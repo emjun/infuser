@@ -50,13 +50,4 @@ if __name__ == '__main__':
 
 
     # TODO What would be a subsetting error? 
-    # What if we have Lukas write scripts with the same datasets as me to see if he makes any bugs? 
-    
 
-
-    # So maybe this example/test focuses on subsetting? 
-    # Another on melting/merging/reformatting into long format? 
-    # Another on simple calculation errors, etc? 
-    # How do we build a compelling argument that this covers the breadth of possible unit errors or that they are the most common ones, etc.?
-    
-    # Scope of statistical tests: Could focus on NHST. But this might not matter?? How should we pick the tests that we test for? Based on their signatures??
