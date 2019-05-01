@@ -5,7 +5,8 @@ from typing import Iterable
 from abstracttypes import AbstractType, TypeReferent
 
 
-class RuleMatch(dataclass):
+@dataclass
+class RuleMatch:
     """An instance of one of our inference rules matching.
 
     Because these always correspond to equality constraints in our analysis,

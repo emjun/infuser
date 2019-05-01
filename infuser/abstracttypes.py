@@ -11,5 +11,6 @@ AbstractType = NewType("AbstractType", int)
 # our inference rules are asserting equality. Keep in mind
 # these don't always obviously correspond to unique expressions
 # in the syntax tree, e.g. DataFrame columns (a kind of Series).
-class TypeReferent(dataclass):
+@dataclass
+class TypeReferent:
     pass
