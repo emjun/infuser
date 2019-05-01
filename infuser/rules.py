@@ -2,7 +2,7 @@ import ast
 from dataclasses import dataclass
 from typing import Iterable
 
-from abstracttypes import AbstractType, TypeReferent
+from .abstracttypes import AbstractType, TypeReferent
 
 
 @dataclass

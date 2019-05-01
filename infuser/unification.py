@@ -1,7 +1,7 @@
 from typing import Iterable, Mapping
 
-from abstracttypes import AbstractType
-from rules import RuleMatch
+from .abstracttypes import AbstractType
+from .rules import RuleMatch
 
 
 def unify(matches: Iterable[RuleMatch]) -> Mapping[AbstractType, AbstractType]:
