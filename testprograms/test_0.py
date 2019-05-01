@@ -5,7 +5,7 @@ import numpy
 from scipy import stats
 
 # GLOBALS
-data_base_path = './tests/data'
+data_base_path = './testprograms/data'
 df = pd.DataFrame()
 
 def load_data(file_name):
