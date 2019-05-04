@@ -1,4 +1,5 @@
 import unittest
+
 from infuser.unification import unify
 
 
@@ -9,5 +10,5 @@ class TestUnification(unittest.TestCase):
         self.assertEqual(len(unify([])), 0)
 
     def test_unify_with_empty_matches_generator(self):
-        g = (_ for _ in range(0))
+        g = iter([])
         self.assertEqual(len(unify(g)), 0)
