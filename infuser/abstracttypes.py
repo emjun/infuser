@@ -1,3 +1,4 @@
+import symtable
 from dataclasses import dataclass
 from typing import NewType
 
@@ -14,3 +15,15 @@ AbstractType = NewType("AbstractType", int)
 @dataclass
 class TypeReferent:
     pass
+
+
+@dataclass
+class SymbolReferent(TypeReferent):
+    symbol_id: symtable.Symbol
+
+
+@dataclass
+class ColumnReferent(TypeReferent):
+    # TODO: What about column re-assignment? Need to SSA column names. `column_name` insufficient
+    df_symbol: symtable.Symbol
+    column_name: str

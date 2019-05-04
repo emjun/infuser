@@ -12,8 +12,6 @@ class RuleMatch:
     Because these always correspond to equality constraints in our analysis,
     we just need two type referents and the type they should share.
     """
-    relevant_node: ast.AST
-    abstract_type: AbstractType
     left: TypeReferent
     right: TypeReferent
 
