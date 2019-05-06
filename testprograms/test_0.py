@@ -1,3 +1,5 @@
+##### Reformatting: Filtering/subsetting
+
 import os
 import csv
 import pandas as pd
@@ -18,7 +20,7 @@ if __name__ == '__main__':
     load_data('data_0.csv')
     
     # This should raise an error:  
-    # Wranglinge
+    # Wrangling
     # NONE 
     
     # Analysis

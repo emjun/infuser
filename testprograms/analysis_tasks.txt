@@ -1,0 +1,18 @@
+## Task 1: Time/Accuracy performance on a task
+## Data set: data/data_0.csv
+## Use T-tests and any other tests you think would be appropriate
+## Tasks: 
+# Compare the time between groups A and B 
+
+# Compare the accuracy between groups A and B 
+
+## Task 2: System performance
+## Data set: data/timing.csv
+## Background: There are three strategies that may affect system performance: naive, caching, and forking. 
+## Programs are run with program variants
+## Programs are run multiple times (hence there are multiple "runs")
+## Tasks: 
+# Do the strategies vary across runs? Compare each strategy across runs
+
+# How do the strategies compare to one another?
+
