@@ -1,0 +1,824 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="deb15222-2ddf-4702-b18b-a6b5926230e9" name="Default Changelist" comment="Simplest possible rule application.&#10;&#10;One unit test passes. It's a start.">
+      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/infuser/abstracttypes.py" beforeDir="false" afterPath="$PROJECT_DIR$/infuser/abstracttypes.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/infuser/rules.py" beforeDir="false" afterPath="$PROJECT_DIR$/infuser/rules.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/rules.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/rules.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/unification.py" beforeDir="false" afterPath="$PROJECT_DIR$/test/unification.py" afterDir="false" />
+    </list>
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileEditorManager">
+    <splitter split-orientation="horizontal" split-proportion="0.5">
+      <split-first>
+        <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/test/__init__.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="18">
+                  <caret line="1" column="35" selection-start-line="1" selection-start-column="35" selection-end-line="1" selection-end-column="35" />
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/infuser/rules.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="516">
+                  <caret line="38" column="33" lean-forward="true" selection-start-line="38" selection-start-column="33" selection-end-line="38" selection-end-column="33" />
+                  <folding>
+                    <element signature="e#0#10#0" expanded="true" />
+                    <element signature="e#821#845#0" />
+                    <element signature="e#974#1157#0" />
+                    <element signature="e#1013#1157#0" />
+                    <element signature="e#1341#1872#0" />
+                    <element signature="e#1401#1838#0" />
+                    <element signature="e#1438#1838#0" />
+                    <element signature="e#1552#1656#0" />
+                    <element signature="e#1730#1838#0" />
+                    <element signature="e#1938#2046#0" />
+                    <element signature="e#3364#3531#0" />
+                    <element signature="e#3481#3555#0" />
+                    <element signature="e#3745#5099#0" />
+                    <element signature="e#3331#3395#0" />
+                    <element signature="e#4029#5016#0" />
+                    <element signature="e#3973#4105#0" />
+                    <element signature="e#3999#4104#0" />
+                    <element signature="e#4313#4461#0" />
+                    <element signature="e#4579#5148#0" />
+                    <element signature="e#4637#5025#0" />
+                    <element signature="e#4686#4782#0" />
+                    <element signature="e#4934#5025#0" />
+                    <element signature="e#4885#5051#0" />
+                    <element signature="e#2113#2325#0" />
+                    <element signature="e#2176#2275#0" />
+                    <element signature="e#2221#2275#0" />
+                    <element signature="e#2372#2395#0" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/infuser/abstracttypes.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="504">
+                  <caret line="29" column="18" selection-start-line="29" selection-start-column="18" selection-end-line="29" selection-end-column="18" />
+                  <folding>
+                    <element signature="e#0#27#0" expanded="true" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/infuser/__init__.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="54">
+                  <caret line="3" selection-start-line="3" selection-end-line="3" />
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/test/main.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="378">
+                  <caret line="21" selection-start-line="21" selection-end-line="21" />
+                  <folding>
+                    <element signature="e#0#9#0" expanded="true" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/test/unification.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="234">
+                  <caret line="13" lean-forward="true" selection-start-line="13" selection-end-line="13" />
+                  <folding>
+                    <element signature="e#0#15#0" expanded="true" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+        </leaf>
+      </split-first>
+      <split-second>
+        <leaf>
+          <file pinned="false" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/test/rules.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="711">
+                  <caret line="87" column="46" selection-start-line="87" selection-start-column="46" selection-end-line="87" selection-end-column="46" />
+                  <folding>
+                    <element signature="e#0#10#0" expanded="true" />
+                  </folding>
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
+            <entry file="file://$USER_HOME$/Library/Caches/PyCharm2019.1/python_stubs/1110904250/_ast.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="370">
+                  <caret line="557" column="11" selection-start-line="557" selection-start-column="11" selection-end-line="557" selection-end-column="11" />
+                </state>
+              </provider>
+            </entry>
+          </file>
+          <file pinned="false" current-in-tab="false">
+            <entry file="file:///usr/local/miniconda3/envs/infuser/lib/python3.7/unittest/case.py">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="289">
+                  <caret line="614" selection-start-line="614" selection-end-line="614" />
+                </state>
+              </provider>
+            </entry>
+          </file>
+        </leaf>
+      </split-second>
+    </splitter>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>def com</find>
+      <find>TextIO</find>
+      <find>dataclass</find>
+      <find>ast.parse</find>
+      <find>filename</find>
+      <find>Expr</find>
+      <find>_expr_type_assignments</find>
+      <find>get_expr_type</find>
+      <find>_get_symbol_type</find>
+      <find>== None</find>
+      <find>visit_ass</find>
+      <find>rule_matches</find>
+      <find>_sym_type_assignments</find>
+      <find>RuleMatch</find>
+      <find>c</find>
+    </findStrings>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/infuser/unification.py" />
+        <option value="$PROJECT_DIR$/infuser/__main__.py" />
+        <option value="$PROJECT_DIR$/infuser/test/main.py" />
+        <option value="$PROJECT_DIR$/infuser/__init__.py" />
+        <option value="$PROJECT_DIR$/infuser/test/__init__.py" />
+        <option value="$PROJECT_DIR$/infuser/test/unification.py" />
+        <option value="$PROJECT_DIR$/test/__init__.py" />
+        <option value="$PROJECT_DIR$/infuser/abstracttypes.py" />
+        <option value="$PROJECT_DIR$/test/rules.py" />
+        <option value="$PROJECT_DIR$/test/unification.py" />
+        <option value="$PROJECT_DIR$/infuser/rules.py" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectFrameBounds" fullScreen="true">
+    <option name="x" value="145" />
+    <option name="y" value="23" />
+    <option name="width" value="1135" />
+    <option name="height" value="726" />
+  </component>
+  <component name="ProjectView">
+    <navigator proportions="" version="1">
+      <foldersAlwaysOnTop value="true" />
+    </navigator>
+    <panes>
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="infuser" type="b2602c69:ProjectViewProjectNode" />
+              <item name="infuser" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="infuser" type="b2602c69:ProjectViewProjectNode" />
+              <item name="infuser" type="462c0819:PsiDirectoryNode" />
+              <item name="infuser" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="infuser" type="b2602c69:ProjectViewProjectNode" />
+              <item name="infuser" type="462c0819:PsiDirectoryNode" />
+              <item name="test" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="infuser" type="b2602c69:ProjectViewProjectNode" />
+              <item name="infuser" type="462c0819:PsiDirectoryNode" />
+              <item name="testprograms" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="infuser" type="b2602c69:ProjectViewProjectNode" />
+              <item name="infuser" type="462c0819:PsiDirectoryNode" />
+              <item name="testprograms" type="462c0819:PsiDirectoryNode" />
+              <item name="data" type="462c0819:PsiDirectoryNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
+      <pane id="Scope" />
+    </panes>
+  </component>
+  <component name="PropertiesComponent">
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
+    <property name="nodejs_npm_path_reset_for_default_project" value="true" />
+    <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
+    <property name="settings.editor.selected.configurable" value="preferences.lookFeel" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+    </key>
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="RunManager" selected="Python tests.Unittests for rules.TestRules.test_walk_rules_over_simple_straightline_assignment_examples">
+    <configuration name="__main__" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="infuser" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <EXTENSION ID="net.ashald.envfile">
+        <option name="IS_ENABLED" value="false" />
+        <option name="IS_SUBST" value="false" />
+        <option name="IS_PATH_MACRO_SUPPORTED" value="false" />
+        <option name="IS_IGNORE_MISSING_FILES" value="false" />
+        <ENTRIES>
+          <ENTRY IS_ENABLED="true" PARSER="runconfig" />
+        </ENTRIES>
+      </EXTENSION>
+      <option name="SCRIPT_NAME" value="infuser.__main__" />
+      <option name="PARAMETERS" value="testprograms/test_0.py" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="true" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Unittests for rules.TestRules.test_walk_rules_over_example1" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+      <module name="infuser" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/test" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;rules.TestRules.test_walk_rules_over_example1&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Unittests for rules.TestRules.test_walk_rules_over_simple_assignment_example" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+      <module name="infuser" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/test" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;rules.TestRules.test_walk_rules_over_simple_assignment_example&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Unittests for rules.TestRules.test_walk_rules_over_simple_straightline_assignment_examples" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+      <module name="infuser" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/test" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;rules.TestRules.test_walk_rules_over_simple_straightline_assignment_examples&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Unittests for test" type="tests" factoryName="Unittests" nameIsGenerated="true">
+      <module name="infuser" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="/usr/local/miniconda3/envs/infuser/bin/python" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <EXTENSION ID="net.ashald.envfile">
+        <option name="IS_ENABLED" value="false" />
+        <option name="IS_SUBST" value="false" />
+        <option name="IS_PATH_MACRO_SUPPORTED" value="false" />
+        <option name="IS_IGNORE_MISSING_FILES" value="false" />
+        <ENTRIES>
+          <ENTRY IS_ENABLED="true" PARSER="runconfig" />
+        </ENTRIES>
+      </EXTENSION>
+      <option name="_new_pattern" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;test&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Python.__main__" />
+      <item itemvalue="Python tests.Unittests for test" />
+      <item itemvalue="Python tests.Unittests for rules.TestRules.test_walk_rules_over_example1" />
+      <item itemvalue="Python tests.Unittests for rules.TestRules.test_walk_rules_over_simple_assignment_example" />
+      <item itemvalue="Python tests.Unittests for rules.TestRules.test_walk_rules_over_simple_straightline_assignment_examples" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python tests.Unittests for rules.TestRules.test_walk_rules_over_simple_straightline_assignment_examples" />
+        <item itemvalue="Python tests.Unittests for rules.TestRules.test_walk_rules_over_simple_assignment_example" />
+        <item itemvalue="Python tests.Unittests for rules.TestRules.test_walk_rules_over_example1" />
+        <item itemvalue="Python.__main__" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="deb15222-2ddf-4702-b18b-a6b5926230e9" name="Default Changelist" comment="" />
+      <created>1556683775573</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1556683775573</updated>
+      <workItem from="1556683789916" duration="82000" />
+      <workItem from="1556683930035" duration="222000" />
+      <workItem from="1556684176701" duration="2739000" />
+      <workItem from="1556686963078" duration="1722000" />
+      <workItem from="1556737524007" duration="1379000" />
+      <workItem from="1556916629152" duration="27334000" />
+    </task>
+    <task id="LOCAL-00001" summary="First sketch of the system architecture">
+      <created>1556686803826</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1556686803826</updated>
+    </task>
+    <task id="LOCAL-00002" summary="dataclass syntax fix + 1 simple unit test">
+      <created>1556688055272</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1556688055272</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Cleaned up RuleMatch and extended TypeReferent">
+      <created>1556933349580</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1556933349581</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Added first walk_rules test">
+      <created>1556933393458</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1556933393458</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
+    <servers />
+  </component>
+  <component name="TestHistory">
+    <history-entry file="Unittests_for_rules_TestRules_test_walk_rules_over_simple_straightline_assignment_examples - 2019.05.04 at 13h 43m 13s.xml">
+      <configuration name="Unittests for rules.TestRules.test_walk_rules_over_simple_straightline_assignment_examples" configurationId="tests" />
+    </history-entry>
+    <history-entry file="Unittests_for_rules_TestRules_test_walk_rules_over_simple_straightline_assignment_examples - 2019.05.04 at 13h 45m 13s.xml">
+      <configuration name="Unittests for rules.TestRules.test_walk_rules_over_simple_straightline_assignment_examples" configurationId="tests" />
+    </history-entry>
+    <history-entry file="Unittests_for_rules_TestRules_test_walk_rules_over_simple_straightline_assignment_examples - 2019.05.04 at 13h 45m 18s.xml">
+      <configuration name="Unittests for rules.TestRules.test_walk_rules_over_simple_straightline_assignment_examples" configurationId="tests" />
+    </history-entry>
+    <history-entry file="Unittests_for_rules_TestRules_test_walk_rules_over_simple_straightline_assignment_examples - 2019.05.04 at 13h 45m 59s.xml">
+      <configuration name="Unittests for rules.TestRules.test_walk_rules_over_simple_straightline_assignment_examples" configurationId="tests" />
+    </history-entry>
+    <history-entry file="Unittests_for_rules_TestRules_test_walk_rules_over_simple_straightline_assignment_examples - 2019.05.04 at 13h 47m 18s.xml">
+      <configuration name="Unittests for rules.TestRules.test_walk_rules_over_simple_straightline_assignment_examples" configurationId="tests" />
+    </history-entry>
+    <history-entry file="Unittests_for_rules_TestRules_test_walk_rules_over_simple_straightline_assignment_examples - 2019.05.04 at 13h 47m 53s.xml">
+      <configuration name="Unittests for rules.TestRules.test_walk_rules_over_simple_straightline_assignment_examples" configurationId="tests" />
+    </history-entry>
+    <history-entry file="Unittests_for_rules_TestRules_test_walk_rules_over_simple_straightline_assignment_examples - 2019.05.04 at 13h 48m 09s.xml">
+      <configuration name="Unittests for rules.TestRules.test_walk_rules_over_simple_straightline_assignment_examples" configurationId="tests" />
+    </history-entry>
+    <history-entry file="Unittests_for_rules_TestRules_test_walk_rules_over_simple_straightline_assignment_examples - 2019.05.04 at 13h 49m 17s.xml">
+      <configuration name="Unittests for rules.TestRules.test_walk_rules_over_simple_straightline_assignment_examples" configurationId="tests" />
+    </history-entry>
+    <history-entry file="Unittests_for_rules_TestRules_test_walk_rules_over_simple_straightline_assignment_examples - 2019.05.04 at 13h 54m 50s.xml">
+      <configuration name="Unittests for rules.TestRules.test_walk_rules_over_simple_straightline_assignment_examples" configurationId="tests" />
+    </history-entry>
+    <history-entry file="Unittests_for_rules_TestRules_test_walk_rules_over_simple_straightline_assignment_examples - 2019.05.04 at 13h 58m 39s.xml">
+      <configuration name="Unittests for rules.TestRules.test_walk_rules_over_simple_straightline_assignment_examples" configurationId="tests" />
+    </history-entry>
+  </component>
+  <component name="TimeTrackingManager">
+    <option name="totallyTimeSpent" value="33478000" />
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="0" y="0" width="2560" height="1440" extended-state="0" />
+    <editor active="true" />
+    <layout>
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.091739476" />
+      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
+      <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info anchor="bottom" id="Messages" weight="0.329927" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.32919708" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.329927" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.34671533" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="6" />
+      <window_info anchor="bottom" id="Docker" order="7" />
+      <window_info anchor="bottom" id="Version Control" order="8" weight="0.32876712" />
+      <window_info anchor="bottom" id="Database Changes" order="9" />
+      <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
+      <window_info anchor="bottom" id="Terminal" order="11" weight="0.3280757" />
+      <window_info anchor="bottom" id="Python Console" order="12" />
+      <window_info active="true" anchor="bottom" id="Inspection Results" order="13" visible="true" weight="0.32919708" />
+      <window_info anchor="right" id="Commander" order="0" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="right" id="Remote Host" order="3" />
+      <window_info anchor="right" id="SciView" order="4" />
+      <window_info anchor="right" id="Database" order="5" />
+    </layout>
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="true" />
+    <option name="CHECK_CODE_CLEANUP_BEFORE_PROJECT_COMMIT" value="true" />
+    <option name="CHECK_NEW_TODO" value="false" />
+    <MESSAGE value="First sketch of the system architecture" />
+    <MESSAGE value="dataclass syntax fix + 1 simple unit test" />
+    <MESSAGE value="Cleaned up RuleMatch and extended TypeReferent" />
+    <MESSAGE value="Added first walk_rules test" />
+    <MESSAGE value="Simplest possible rule application.&#10;&#10;One unit test passes. It's a start." />
+    <option name="LAST_COMMIT_MESSAGE" value="Simplest possible rule application.&#10;&#10;One unit test passes. It's a start." />
+    <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
+    <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
+    <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/test/main.py</url>
+          <line>20</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/infuser/rules.py</url>
+          <line>179</line>
+          <option name="timeStamp" value="13" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/infuser/rules.py</url>
+          <line>160</line>
+          <option name="timeStamp" value="15" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/infuser/rules.py</url>
+          <line>164</line>
+          <option name="timeStamp" value="16" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/infuser$Unittests.coverage" NAME="Unittests Coverage Results" MODIFIED="1556739215915" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/infuser" />
+    <SUITE FILE_PATH="coverage/infuser$__main__.coverage" NAME="__main__ Coverage Results" MODIFIED="1556688024802" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/infuser$Unittests_for_rules_TestRules_test_walk_rules_over_example1.coverage" NAME="Unittests for rules.TestRules.test_walk_rules_over_example1 Coverage Results" MODIFIED="1556918808750" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
+    <SUITE FILE_PATH="coverage/infuser$Unittests_in_test.coverage" NAME="Unittests for test Coverage Results" MODIFIED="1556739679328" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/infuser$Unittests_for_infuser_test.coverage" NAME="Unittests for infuser.test Coverage Results" MODIFIED="1556739478601" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/infuser$Unittests_for_main_TestAnalysisMain_test_parses_test_programs_without_crashing.coverage" NAME="Unittests for main.TestAnalysisMain.test_parses_test_programs_without_crashing Coverage Results" MODIFIED="1556687986137" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/infuser/test" />
+    <SUITE FILE_PATH="coverage/infuser$Unittests_for_rules_TestRules_test_walk_rules_over_simple_assignment_example.coverage" NAME="Unittests for rules.TestRules.test_walk_rules_over_simple_assignment_example Coverage Results" MODIFIED="1556996608773" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
+    <SUITE FILE_PATH="coverage/infuser$Unittests_for_test.coverage" NAME="Unittests for test Coverage Results" MODIFIED="1556996798950" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/infuser$Unittests_for_rules_TestRules_test_walk_rules_over_simple_straightline_assignment_examples.coverage" NAME="Unittests for rules.TestRules.test_walk_rules_over_simple_straightline_assignment_examples Coverage Results" MODIFIED="1557004070870" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
+  </component>
+  <component name="debuggerHistoryManager">
+    <expressions id="breakpointCondition">
+      <expression>
+        <expression-string>&quot;id&quot; not in t.__dict__</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>not isinstance(expr.slice.value, ast.Name)</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+    </expressions>
+    <expressions id="evaluateExpression">
+      <expression>
+        <expression-string>visitor._sym_type_assignments</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>matches</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>visitor._sym_type_assignments[visitor._table_stack[-1].lookup(&quot;d&quot;)]</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>visitor._table_stack[-1].lookup(&quot;d&quot;)</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>p2_expr</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>visitor.get_expr_type(p2_expr)</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>visitor.get_expr_type(p1_expr)</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>p1_expr</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>expr.slice.value.s</expression-string>
+        <language-id>Python</language-id>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+    </expressions>
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/Pipfile">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="198">
+          <caret line="11" column="10" selection-start-line="11" selection-start-column="10" selection-end-line="11" selection-end-column="10" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/tests/requirements.txt" />
+    <entry file="file://$PROJECT_DIR$/testprograms/data/data_0.csv">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file:///usr/local/miniconda3/envs/infuser/lib/python3.7/unittest/loader.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3366">
+          <caret line="197" selection-start-line="197" selection-end-line="197" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/local/miniconda3/envs/infuser/lib/python3.7/runpy.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1872">
+          <caret line="108" selection-start-line="108" selection-end-line="108" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/infuser/__main__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="108">
+          <caret line="6" selection-start-line="6" selection-end-line="6" />
+          <folding>
+            <element signature="e#0#15#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/infuser/unification.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="180">
+          <caret line="13" selection-start-line="13" selection-end-line="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/testprograms/test_0.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="360">
+          <caret line="45" column="47" selection-start-line="45" selection-start-column="47" selection-end-line="45" selection-end-column="47" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/Library/Caches/PyCharm2019.1/python_stubs/1110904250/builtins.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="289">
+          <caret line="3525" column="16" selection-start-line="3525" selection-start-column="6" selection-end-line="3525" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/local/miniconda3/envs/infuser/lib/python3.7/symtable.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="379">
+          <caret line="97" selection-start-line="97" selection-end-line="97" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/local/miniconda3/envs/infuser/lib/python3.7/unittest/case.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="289">
+          <caret line="614" selection-start-line="614" selection-end-line="614" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/local/miniconda3/envs/infuser/lib/python3.7/ast.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="686">
+          <caret line="283" column="58" selection-start-line="283" selection-start-column="58" selection-end-line="283" selection-end-column="58" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$APPLICATION_HOME_DIR$/helpers/typeshed/stdlib/3/unittest/__init__.pyi">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="666">
+          <caret line="44" column="24" selection-start-line="44" selection-start-column="24" selection-end-line="44" selection-end-column="24" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="18">
+          <caret line="1" column="35" selection-start-line="1" selection-start-column="35" selection-end-line="1" selection-end-column="35" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="378">
+          <caret line="21" selection-start-line="21" selection-end-line="21" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/infuser/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="54">
+          <caret line="3" selection-start-line="3" selection-end-line="3" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/local/miniconda3/envs/infuser/lib/python3.7/typing.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="296">
+          <caret line="889" column="4" selection-start-line="889" selection-start-column="4" selection-end-line="889" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/Library/Caches/PyCharm2019.1/python_stubs/1110904250/_ast.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="370">
+          <caret line="557" column="11" selection-start-line="557" selection-start-column="11" selection-end-line="557" selection-end-column="11" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/rules.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="711">
+          <caret line="87" column="46" selection-start-line="87" selection-start-column="46" selection-end-line="87" selection-end-column="46" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/infuser/abstracttypes.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="504">
+          <caret line="29" column="18" selection-start-line="29" selection-start-column="18" selection-end-line="29" selection-end-column="18" />
+          <folding>
+            <element signature="e#0#27#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/unification.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="234">
+          <caret line="13" lean-forward="true" selection-start-line="13" selection-end-line="13" />
+          <folding>
+            <element signature="e#0#15#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/infuser/rules.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="516">
+          <caret line="38" column="33" lean-forward="true" selection-start-line="38" selection-start-column="33" selection-end-line="38" selection-end-column="33" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+            <element signature="e#821#845#0" />
+            <element signature="e#974#1157#0" />
+            <element signature="e#1013#1157#0" />
+            <element signature="e#1341#1872#0" />
+            <element signature="e#1401#1838#0" />
+            <element signature="e#1438#1838#0" />
+            <element signature="e#1552#1656#0" />
+            <element signature="e#1730#1838#0" />
+            <element signature="e#1938#2046#0" />
+            <element signature="e#3364#3531#0" />
+            <element signature="e#3481#3555#0" />
+            <element signature="e#3745#5099#0" />
+            <element signature="e#3331#3395#0" />
+            <element signature="e#4029#5016#0" />
+            <element signature="e#3973#4105#0" />
+            <element signature="e#3999#4104#0" />
+            <element signature="e#4313#4461#0" />
+            <element signature="e#4579#5148#0" />
+            <element signature="e#4637#5025#0" />
+            <element signature="e#4686#4782#0" />
+            <element signature="e#4934#5025#0" />
+            <element signature="e#4885#5051#0" />
+            <element signature="e#2113#2325#0" />
+            <element signature="e#2176#2275#0" />
+            <element signature="e#2221#2275#0" />
+            <element signature="e#2372#2395#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+  </component>
+  <component name="masterDetails">
+    <states>
+      <state key="ScopeChooserConfigurable.UI">
+        <settings>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.19745223" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+    </states>
+  </component>
+</project>

@@ -1,7 +1,7 @@
 import ast
 from typing import IO
 
-from rules import walk_rules
+from .rules import walk_rules
 
 
 def analysis_main(client: IO[str]):
