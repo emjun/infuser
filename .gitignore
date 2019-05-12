@@ -1,5 +1,6 @@
 __pycache__
 .vscode
+.idea
 .mypy_cache
 mytest.py
 mytest2.py
