@@ -125,12 +125,6 @@ class WalkRulesVisitor(ast.NodeVisitor):
         for child in node.body:
             self.visit(child)
 
-        # Constrain all return types to equality (if more than one)
-        extra_constraints = set()
-        for i in range(1, len(self._return_types[-1])):
-            extra_constraints.add((self._return_types[-1][i - 1],
-                                   self._return_types[-1][i]))
-
         # Choose an arbitrary return type for the signature
         rt = None
         if len(self._return_types[-1]):
