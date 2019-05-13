@@ -1,21 +1,45 @@
-from itertools import count
-from typing import Mapping
+from dataclasses import dataclass
+from itertools import count, chain
+from typing import Sequence, Union, Set, Optional
 
 _fresh_typename_counter = count(0)
 
 
-class AbstractType:
+class TypeVar:
+    def __init__(self):
+        super().__init__()
+        self.name = "TV" + str(next(_fresh_typename_counter))
+
+    def __hash__(self):
+        return hash((self.name, id(self)))
+
+    def __eq__(self, other):
+        return self is other
+
+    def __str__(self):
+        return self.name
+
+
+class Type:
+    @property
+    def type_parameters(self) -> Sequence["Type"]:
+        raise NotImplementedError()
+
     def __eq__(self, other):
         raise NotImplementedError()
 
 
 # TODO: There must be a better name than `SymbolicAbtractType`
-class SymbolicAbstractType(AbstractType):
+class SymbolicAbstractType(Type):
     """A simple abstract monotype."""
 
     def __init__(self):
         super().__init__()
-        self.typename = "T" + str(next(_fresh_typename_counter))
+        self.typename = "t" + str(next(_fresh_typename_counter))
+
+    @property
+    def type_parameters(self) -> Sequence[Type]:
+        return []
 
     def __hash__(self):
         return hash((self.typename, id(self)))
@@ -27,37 +51,53 @@ class SymbolicAbstractType(AbstractType):
         return self.typename
 
 
-class DataFrameType(AbstractType):
-    column_types: Mapping[str, AbstractType]
-
-    def __init__(self, column_types):
-        super().__init__()
-        self.column_types = column_types
-
-    def reassign_column_type(self, col_name: str, col_type: AbstractType) \
-            -> "DataFrameType":
-        new_cols = dict(self.column_types)
-        new_cols[col_name] = col_type
-        return DataFrameType(new_cols)
-
-    def __hash__(self):
-        return hash(tuple(t for c, t in self.column_types.items()))
-
-    def __eq__(self, other):
-        if not isinstance(other, DataFrameType):
-            return False
-        return dict(self.column_types) == dict(other.column_types)
+@dataclass(frozen=True)
+class ExtraCol:
+    arg: Union[int, str]
+    col_name: str
+    col_type: Union[Type, TypeVar]
 
     def __str__(self):
-        coltyps = self.column_types
-        return "DF[" + ', '.join(f"{k}: {v}" for k, v in coltyps.items()) + "]"
+        return f"{self.arg}[{self.col_name}]:{self.col_type}"
 
 
-class PandasModuleType(AbstractType):
+@dataclass(eq=True, frozen=True)
+class CallableType(Type):
+    "Type for functions and other callables. The only parametric type we have."
+
+    arg_types: Sequence[Union[Type, TypeVar]]
+    return_type: Optional[Union[Type, TypeVar]]
+    "Either the return type of the function or `None` if void/unit."
+
+    extra_cols: Set[ExtraCol]
+    "Extra column-types to introduce on arguments"
+
+    @property
+    def type_parameters(self) -> Sequence[Type]:
+        return list(chain(self.arg_types, [self.return_type]))
+
+    def __str__(self):
+        a = ", ".join(str(x) for x in self.arg_types)
+        b = f"({a}) → {self.return_type}"
+        if len(self.extra_cols):
+            e = ", ".join(str(c) for c in self.extra_cols)
+            b += f" \\\\ ({e})"
+        return b
+
+
+class PandasModuleType(Type):
+    @property
+    def type_parameters(self) -> Sequence[Type]:
+        return []
+
     def __eq__(self, other):
         return isinstance(other, PandasModuleType)
 
 
-class DataFrameClsType(AbstractType):
+class DataFrameClsType(Type):
+    @property
+    def type_parameters(self) -> Sequence[Type]:
+        return []
+
     def __eq__(self, other):
         return isinstance(other, DataFrameClsType)

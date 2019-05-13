@@ -3,7 +3,6 @@ import symtable
 from typing import List, cast
 import unittest
 
-from abstracttypes import DataFrameType
 from infuser.rules import WalkRulesVisitor
 
 
@@ -41,10 +40,10 @@ d["Price2"] = d["Price"]"""]
             # above.
             visitor = WalkRulesVisitor(table)
             visitor.visit(root_node)
-            matches = list(visitor.rule_matches)
+            matches = list(visitor.type_constraints)
             self.assertEqual(2, len(matches))
             final_d_cols = cast(DataFrameType, visitor._sym_type_assignments[
-                visitor._table_stack[-1].lookup("d")]).column_types
+                visitor._symtable_stack[-1].lookup("d")]).column_types
             self.assertEqual(2, len(final_d_cols))
             self.assertEqual(1, len(set(final_d_cols.values())))
 
@@ -84,9 +83,9 @@ ex()""",
             # above.
             visitor = WalkRulesVisitor(table)
             visitor.visit(root_node)
-            matches = cast(List[ast.Expr], list(visitor.rule_matches))
+            matches = cast(List[ast.Expr], list(visitor.type_constraints))
             self.assertEqual(len(matches), 1)
-            self.assertSetEqual({visitor.get_expr_type(matches[0].left),
-                                 visitor.get_expr_type(matches[0].right)},
-                                {visitor.get_expr_type(p1_expr),
-                                 visitor.get_expr_type(p2_expr)})
+            self.assertSetEqual({visitor._get_expr_type(matches[0].left),
+                                 visitor._get_expr_type(matches[0].right)},
+                                {visitor._get_expr_type(p1_expr),
+                                 visitor._get_expr_type(p2_expr)})

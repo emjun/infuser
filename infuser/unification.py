@@ -1,13 +1,13 @@
 from typing import Iterable, Mapping
 
-from .abstracttypes import AbstractType, DataFrameType, SymbolicAbstractType
-from .rules import RuleMatch
+from .abstracttypes import Type, DataFrameType, SymbolicAbstractType
+from .rules import TypeEqConstraint
 
 
 # returns an abstract type depending on the abstract types that have previously
 # been assigned to left and right
 # if no abstract type has been assigned yet, assigns a new one
-def get_symbolic_at(left : AbstractType, right : AbstractType, mapping : Mapping[AbstractType, AbstractType]):
+def get_symbolic_at(left: Type, right: Type, mapping: Mapping[Type, Type]):
     m_l = mapping.get(left)
     m_r = mapping.get(right)
     
@@ -22,8 +22,8 @@ def get_symbolic_at(left : AbstractType, right : AbstractType, mapping : Mapping
     
 # substitues for the columns that have abstract type either left or right
 # their old abstract type with the new abstract type at
-def substitute_df_cols(df_type : DataFrameType, left : AbstractType, right : AbstractType,
-                        at : AbstractType,  mapping : Mapping[AbstractType, AbstractType]):
+def substitute_df_cols(df_type: DataFrameType, left: Type, right: Type,
+                       at: Type, mapping: Mapping[Type, Type]):
     
     for name, a_type in df_type.column_types.items():
         if a_type == left or a_type == right:
@@ -32,7 +32,8 @@ def substitute_df_cols(df_type : DataFrameType, left : AbstractType, right : Abs
     
     return df_type, mapping
 
-def unify(matches: Iterable[RuleMatch]) -> Mapping[AbstractType, AbstractType]:
+
+def unify(matches: Iterable[TypeEqConstraint]) -> Mapping[Type, Type]:
     """Create a mapping from the original to unified abstract types.
 
     These new abstract types should satisfy the equality constraints
@@ -56,8 +57,8 @@ def unify(matches: Iterable[RuleMatch]) -> Mapping[AbstractType, AbstractType]:
             at = get_symbolic_at(left, right, mapping)
             mapping[left] = at
             mapping[right] = at
-            
-            for m_1 in matches: # apply the AT to all RuleMatch entries
+
+            for m_1 in matches:  # apply the AT to all TypeEqConstraint entries
                 
                 m_1_l = m_1.left
                 m_1_r = m_1.right
@@ -118,7 +119,7 @@ def unify(matches: Iterable[RuleMatch]) -> Mapping[AbstractType, AbstractType]:
         
         # ... make sure we have the new AT in the result
         if mapped_left == None and mapped_right == None:
-            at = AbstractType() # TODO: how to create correct new AT
+            at = Type() # TODO: how to create correct new AT
             mapping[left] = at
             mapping[right] = at
         elif mapped_left == None:
