@@ -114,6 +114,7 @@ class WalkRulesVisitor(ast.NodeVisitor):
         assert (isinstance(top_symtable, symtable.Function))
         arg_types: List[Tuple[TypeVar, symtable.Symbol]] = []
         for sym in top_symtable.get_symbols():
+            # TODO: Make sure this is actually in argument order
             # TODO: Ensure this doesn't grab second-order nested func. params.
             if sym.is_parameter():
                 arg_type_var = TypeVar()
@@ -135,7 +136,7 @@ class WalkRulesVisitor(ast.NodeVisitor):
         if len(self._return_types[-1]):
             rt = self._return_types[-1][0]
 
-        # TODO: Add side effects to `extra_cols`
+        # Add side effects to `extra_cols`
         extra_cols = set()
         for i, (a, sym) in enumerate(arg_types):
             c = type_env.subscripted_name_closure(SymbolTypeReferant(sym))
