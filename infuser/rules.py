@@ -50,6 +50,10 @@ class WalkRulesVisitor(ast.NodeVisitor):
         self._symtable_stack: List[symtable.SymbolTable] = [sym_table]
         self._return_types = []
 
+    @property
+    def type_environment(self) -> TypingEnvironment:
+        return self._type_environment_stack[0]
+
     def visit_Import(self, node: ast.Import):
         for a in node.names:
             if a.name == "pandas":
@@ -95,7 +99,7 @@ class WalkRulesVisitor(ast.NodeVisitor):
                     continue
                 name_sym = self._symtable_stack[-1].lookup(node_arg.id)
                 ref = ColumnTypeReferant(symbol=SymbolTypeReferant(name_sym),
-                                         column_names=(extra_col.col_name,))
+                                         column_names=extra_col.col_names)
                 prev_type = self._type_environment_stack[-1].get_or_bake(ref)
                 self.type_constraints.append(
                     TypeEqConstraint(prev_type, extra_col.col_type, node))
@@ -139,7 +143,8 @@ class WalkRulesVisitor(ast.NodeVisitor):
 
         # TODO: Add global re-assignments to `extra_constaints`
 
-        func_type = CallableType([x[0] for x in arg_types], rt, extra_cols)
+        func_type = CallableType(
+            tuple([x[0] for x in arg_types]), rt, frozenset(extra_cols))
 
         self._return_types.pop()
         self._pop_scope()
@@ -231,9 +236,6 @@ class WalkRulesVisitor(ast.NodeVisitor):
             return None
 
         if isinstance(expr, ast.Subscript):
-            if not isinstance(expr.ctx, ast.Load):
-                return None
-
             # The only subscripts we care about are chains of string literals.
             root, subscript_chain = accum_string_subscripts(expr)
             if not isinstance(root, ast.Name):
@@ -252,7 +254,8 @@ class WalkRulesVisitor(ast.NodeVisitor):
         if isinstance(expr, ast.Attribute):
             raise NotImplementedError("Attributes not implemented")
 
-        raise NotImplementedError("Unable to judge type for expression")
+        raise NotImplementedError(
+            f"Unable to judge type for expression: {expr}")
 
     def _push_scope(self, name: str) -> None:
         # Push a freshly baked, empty type environment

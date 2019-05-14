@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from itertools import count, chain
-from typing import Sequence, Union, Set, Optional
+from typing import Sequence, Union, Optional, Tuple, FrozenSet
 
 _fresh_typename_counter = count(0)
 
@@ -54,22 +54,22 @@ class SymbolicAbstractType(Type):
 @dataclass(frozen=True)
 class ExtraCol:
     arg: Union[int, str]
-    col_name: str
+    col_names: Tuple[str]
     col_type: Union[Type, TypeVar]
 
     def __str__(self):
-        return f"{self.arg}[{self.col_name}]:{self.col_type}"
+        return f"{self.arg}[{self.col_names}]:{self.col_type}"
 
 
 @dataclass(eq=True, frozen=True)
 class CallableType(Type):
     "Type for functions and other callables. The only parametric type we have."
 
-    arg_types: Sequence[Union[Type, TypeVar]]
+    arg_types: Tuple[Union[Type, TypeVar], ...]
     return_type: Optional[Union[Type, TypeVar]]
     "Either the return type of the function or `None` if void/unit."
 
-    extra_cols: Set[ExtraCol]
+    extra_cols: FrozenSet[ExtraCol]
     "Extra column-types to introduce on arguments"
 
     @property
@@ -93,6 +93,9 @@ class PandasModuleType(Type):
     def __eq__(self, other):
         return isinstance(other, PandasModuleType)
 
+    def __hash__(self):
+        return 30
+
 
 class DataFrameClsType(Type):
     @property
@@ -101,3 +104,6 @@ class DataFrameClsType(Type):
 
     def __eq__(self, other):
         return isinstance(other, DataFrameClsType)
+
+    def __hash__(self):
+        return 30
