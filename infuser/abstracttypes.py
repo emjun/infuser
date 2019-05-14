@@ -22,7 +22,7 @@ class TypeVar:
 
 class Type:
     @property
-    def type_parameters(self) -> Sequence["Type"]:
+    def type_parameters(self) -> Sequence[Union[TypeVar, "Type"]]:
         raise NotImplementedError()
 
     def __eq__(self, other):
@@ -38,7 +38,7 @@ class SymbolicAbstractType(Type):
         self.typename = "t" + str(next(_fresh_typename_counter))
 
     @property
-    def type_parameters(self) -> Sequence[Type]:
+    def type_parameters(self) -> Sequence[Union[TypeVar, Type]]:
         return []
 
     def __hash__(self):
@@ -73,7 +73,7 @@ class CallableType(Type):
     "Extra column-types to introduce on arguments"
 
     @property
-    def type_parameters(self) -> Sequence[Type]:
+    def type_parameters(self) -> Sequence[Union[TypeVar, Type]]:
         return list(chain(self.arg_types, [self.return_type]))
 
     def __str__(self):
@@ -87,7 +87,7 @@ class CallableType(Type):
 
 class PandasModuleType(Type):
     @property
-    def type_parameters(self) -> Sequence[Type]:
+    def type_parameters(self) -> Sequence[Union[TypeVar, Type]]:
         return []
 
     def __eq__(self, other):
@@ -99,7 +99,7 @@ class PandasModuleType(Type):
 
 class DataFrameClsType(Type):
     @property
-    def type_parameters(self) -> Sequence[Type]:
+    def type_parameters(self) -> Sequence[Union[TypeVar, Type]]:
         return []
 
     def __eq__(self, other):
