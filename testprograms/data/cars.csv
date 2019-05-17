@@ -1,0 +1,8 @@
+﻿Car Model,2010_Price,2010_PriceDiscount,2019_Price,2019_PriceDiscount
+Ford Focus,17950,0.03,20050,0.05
+Toyota Supra,49990,0.1,59990,0.08
+,,,,
+,,,,
+Car Model,2010_Price,2019_Price,,
+Ford Focus,17950,250,,
+Toyota Supra,49990,300,,
