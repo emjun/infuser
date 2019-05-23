@@ -8,8 +8,6 @@ from .abstracttypes import Type, SymbolicAbstractType, \
     PandasModuleType, DataFrameClsType, CallableType, TypeVar, ExtraCol
 from .typeenv import TypingEnvironment, SymbolTypeReferant, ColumnTypeReferant
 
-EQ_INDUCING_OPS = ["+", "-", "+=", "-="]
-
 logger = logging.getLogger(__name__)
 
 
@@ -152,6 +150,23 @@ class WalkRulesVisitor(ast.NodeVisitor):
             self._symtable_stack[-1].lookup(node.name))] = func_type
         logger.debug(f"Assigned function {node.name}: {func_type}")
 
+    def visit_AugAssign(self, node: ast.AugAssign) -> None:
+        if isinstance(node.op, (ast.Add, ast.Sub)):
+            if isinstance(node.target, (ast.Name, ast.Subscript)):
+                tgt_type = self._get_expr_type(node.target)
+                if isinstance(node.value, (ast.Name, ast.Subscript)):
+                    val_type = self._get_expr_type(node.value)
+                    constraint = TypeEqConstraint(tgt_type, val_type, node)
+                    self.type_constraints.append(constraint)
+                else:
+                    logger.debug("Skipping AugAssign from value type "
+                                 "%s", type(node.value))
+            elif isinstance(node.target, ast.Attribute):
+                logger.debug("Skipping augmented assignment to attribute")
+        else:
+            logger.debug("Ignoring AugAssign op type %s", type(node.op))
+        self.generic_visit(node)
+
     def visit_Assign(self, node: ast.Assign):
         type_env = self._type_environment_stack[-1]
 
@@ -209,8 +224,8 @@ class WalkRulesVisitor(ast.NodeVisitor):
                     raise NotImplementedError(
                         "Only name and subscripted targets are implemented")
 
-    def _get_expr_type(self, expr: ast.expr, bake_fresh=False) -> Optional[
-        Type]:
+    def _get_expr_type(self, expr: ast.expr, bake_fresh=False) \
+            -> Optional[Type]:
         """Return a type assigned to `expr` or `None` if irrelevant to analysis
 
         Note that this requires the `_symtable_stack` to be set so that `expr`

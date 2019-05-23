@@ -99,6 +99,33 @@ mod(df)"""]
                                                  type_env[df_price2_ref],
                                                  visitor))
 
+    def test_type_eq_after_augmented_assignment(self):
+        # Equivalent examples
+        examples = [
+            "import pandas as pd\n"
+            "df = pd.DataFrame(data={'Price': [10.], 'Price2': [20.]})\n"
+            f"df['Price2'] {op_str} df['Price']""" for op_str in ("+=", "-=")]
+
+        for code_str in examples:
+            root_node = ast.parse(code_str, '<unknown>', 'exec')
+            table = symtable.symtable(code_str, '<unknown>', 'exec')
+
+            # Get the sub-exprs corresponding to the augmented assignment
+            assignment_stmts = [n for n in ast.walk(root_node)
+                                if isinstance(n, ast.AugAssign)]
+            assert len(assignment_stmts) == 1
+            df_symbol_ref = SymbolTypeReferant(table.lookup("df"))
+            df_price_ref = ColumnTypeReferant(df_symbol_ref, ("Price",))
+            df_price2_ref = ColumnTypeReferant(df_symbol_ref, ("Price2",))
+
+            # Make sure the two columns on `df` are unified
+            visitor = WalkRulesVisitor(table)
+            visitor.visit(root_node)
+            type_env = visitor.type_environment
+            self.assertTrue(self.types_connected(type_env[df_price_ref],
+                                                 type_env[df_price2_ref],
+                                                 visitor))
+
     @staticmethod
     def types_connected(a, b, visitor: WalkRulesVisitor) -> bool:
         if not isinstance(a, (Type, TypeVar)):
