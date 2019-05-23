@@ -1,14 +1,13 @@
 ##### Reformatting: Filtering/subsetting
 
 import os
-import csv
+
 import pandas as pd
-import numpy 
 from scipy import stats
 
 # GLOBALS
 data_base_path = './testprograms/data'
-df = pd.DataFrame()
+df = pd.DataFrame(data={})
 
 def load_data(file_name):
     global data_base_path, df

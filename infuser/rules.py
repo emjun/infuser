@@ -286,7 +286,9 @@ class WalkRulesVisitor(ast.NodeVisitor):
             return SymbolicAbstractType()
 
         if isinstance(expr, ast.Call):
-            raise ValueError("_get_expr_type shouldn't be used on calls")
+            logger.debug("Yielding a fresh symbolic type for call")
+            return SymbolicAbstractType()
+
         if isinstance(expr, ast.Attribute):
             raise NotImplementedError("Attributes not implemented")
 
