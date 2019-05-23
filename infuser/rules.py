@@ -58,7 +58,7 @@ class WalkRulesVisitor(ast.NodeVisitor):
                 sym_name = a.name if a.asname is None else a.asname
                 pandas_sym = self._symtable_stack[-1].lookup(sym_name)
                 self._type_environment_stack[-1][
-                    pandas_sym] = PandasModuleType()
+                    SymbolTypeReferant(pandas_sym)] = PandasModuleType()
         self.generic_visit(node)
 
     def visit_ImportFrom(self, node: ast.ImportFrom) -> None:
@@ -120,7 +120,7 @@ class WalkRulesVisitor(ast.NodeVisitor):
             # TODO: Ensure this doesn't grab second-order nested func. params.
             if sym.is_parameter():
                 arg_type_var = TypeVar()
-                type_env[sym] = arg_type_var
+                type_env[SymbolTypeReferant(sym)] = arg_type_var
                 arg_types.append((arg_type_var, sym))
 
         # Avoid decorators. Manually call visit on statements.
@@ -200,7 +200,10 @@ class WalkRulesVisitor(ast.NodeVisitor):
                             "Only name targets are implemented")
         else:
             value_type = self._get_expr_type(node.value, bake_fresh=True)
-            assert value_type is not None
+
+            if value_type is None:
+                logger.debug("Skipping assignment because value has no type")
+                return
 
             for t in node.targets:
                 if isinstance(t, ast.Name):
@@ -237,7 +240,7 @@ class WalkRulesVisitor(ast.NodeVisitor):
         if isinstance(expr, ast.Name):
             if not isinstance(expr.ctx, ast.Load):
                 raise ValueError(f"Looked up name {expr} with non-Load ctx")
-            sym = self._symtable_stack[-1].lookup(expr.id)
+            sym = SymbolTypeReferant(self._symtable_stack[-1].lookup(expr.id))
             to_r = self._type_environment_stack[-1].get(sym)
             if to_r is None and bake_fresh:
                 to_r = self._type_environment_stack[-1].get_or_bake(sym)
@@ -263,6 +266,9 @@ class WalkRulesVisitor(ast.NodeVisitor):
             if bake_fresh:
                 return self._type_environment_stack[-1].get_or_bake(ref)
             return self._type_environment_stack[-1].get(ref)
+
+        if isinstance(expr, (ast.Str, ast.JoinedStr, ast.Num)):
+            return None
 
         if isinstance(expr, ast.Call):
             raise ValueError("_get_expr_type shouldn't be used on calls")

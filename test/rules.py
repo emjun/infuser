@@ -1,5 +1,6 @@
 import ast
 from collections import defaultdict
+from itertools import combinations
 import symtable
 from typing import Iterable
 import unittest
@@ -33,6 +34,23 @@ class TestRules(unittest.TestCase):
 
     # TODO: Make sure to test column re-assignment
     # TODO: Make sure to test whole DataFrame re-assignment
+
+    def test_simple_assignments(self):
+        examples = [(2, "x = 1; y = x"),
+                    (3, "x = 2; y = x; z = y"),
+                    (4, "x = 3; y = x; a = x; z = y")]
+        for expected_type_cnt, code_str in examples:
+            root_node = ast.parse(code_str, '<unknown>', 'exec')
+            table = symtable.symtable(code_str, '<unknown>', 'exec')
+
+            visitor = WalkRulesVisitor(table)
+            visitor.visit(root_node)
+
+            # There should be two things in the typing environment, and they
+            # should be or be constrained to be equal
+            self.assertEqual(expected_type_cnt, len(visitor.type_environment))
+            for a, b in combinations(visitor.type_environment.values(), 2):
+                self.assertTrue(self.types_connected(a, b, visitor))
 
     def test_immediate_unification_over_simple_straightline_assignment_examples(
             self):

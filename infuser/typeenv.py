@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from symtable import Symbol
-from typing import NewType, Mapping, Union, Tuple, TypeVar
+from typing import Mapping, Union, Tuple, TypeVar, MutableMapping
 
 from .abstracttypes import Type, SymbolicAbstractType
 
@@ -8,8 +8,12 @@ from .abstracttypes import Type, SymbolicAbstractType
 # TODO: Make sure we're using "type signature" correctly
 
 
+class TypeReferant:
+    pass
+
+
 @dataclass(eq=True, frozen=True)
-class SymbolTypeReferant:
+class SymbolTypeReferant(TypeReferant):
     symbol: Symbol
 
     def add_subscript(self, str_sub: str) -> "ColumnTypeReferant":
@@ -17,7 +21,7 @@ class SymbolTypeReferant:
 
 
 @dataclass(eq=True, frozen=True)
-class ColumnTypeReferant:
+class ColumnTypeReferant(TypeReferant):
     symbol: SymbolTypeReferant
     column_names: Tuple[str]
 
@@ -33,12 +37,13 @@ class ColumnTypeReferant:
         return ColumnTypeReferant(symbol=new, column_names=self.column_names)
 
 
-# non-mutable
-TypeReferant = NewType("TypeReferant",
-                       Union[SymbolTypeReferant, ColumnTypeReferant])
+class TypingEnvironment(dict,
+                        MutableMapping[TypeReferant, Union[Type, TypeVar]]):
 
-
-class TypingEnvironment(dict, Mapping[TypeReferant, Union[Type, TypeVar]]):
+    def __setitem__(self, key: TypeReferant, value: Union[Type, TypeVar]) \
+            -> None:
+        assert isinstance(key, TypeReferant), f"key type was {type(key)}"
+        super().__setitem__(key, value)
 
     def get_or_bake(self, k: TypeReferant) -> Union[Type, TypeVar]:
         if k not in self:
