@@ -42,7 +42,6 @@ class TestRules(unittest.TestCase):
         for expected_type_cnt, code_str in examples:
             root_node = ast.parse(code_str, '<unknown>', 'exec')
             table = symtable.symtable(code_str, '<unknown>', 'exec')
-
             visitor = WalkRulesVisitor(table)
             visitor.visit(root_node)
 
@@ -51,6 +50,20 @@ class TestRules(unittest.TestCase):
             self.assertEqual(expected_type_cnt, len(visitor.type_environment))
             for a, b in combinations(visitor.type_environment.values(), 2):
                 self.assertTrue(self.types_connected(a, b, visitor))
+
+    def test_types_abandoned_on_reassign(self):
+        code_str = "x = 2; y = x; y = 2"
+        root_node = ast.parse(code_str, '<unknown>', 'exec')
+        table = symtable.symtable(code_str, '<unknown>', 'exec')
+        visitor = WalkRulesVisitor(table)
+        visitor.visit(root_node)
+
+        # There should be two types -- `x` and `y` -- and they should be
+        # disconnected at the end of iteration, despite having interacted
+        # before `y` was re-assigned
+        self.assertEqual(2, len(visitor.type_environment))
+        for a, b in combinations(visitor.type_environment.values(), 2):
+            self.assertFalse(self.types_connected(a, b, visitor))
 
     def test_immediate_unification_over_simple_straightline_assignment_examples(
             self):

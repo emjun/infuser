@@ -201,10 +201,6 @@ class WalkRulesVisitor(ast.NodeVisitor):
         else:
             value_type = self._get_expr_type(node.value, bake_fresh=True)
 
-            if value_type is None:
-                logger.debug("Skipping assignment because value has no type")
-                return
-
             for t in node.targets:
                 if isinstance(t, ast.Name):
                     # Copy type and all its subscripts
@@ -268,7 +264,8 @@ class WalkRulesVisitor(ast.NodeVisitor):
             return self._type_environment_stack[-1].get(ref)
 
         if isinstance(expr, (ast.Str, ast.JoinedStr, ast.Num)):
-            return None
+            # A perpetually fresh type
+            return SymbolicAbstractType()
 
         if isinstance(expr, ast.Call):
             raise ValueError("_get_expr_type shouldn't be used on calls")
