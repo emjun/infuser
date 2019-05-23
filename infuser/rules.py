@@ -154,8 +154,8 @@ class WalkRulesVisitor(ast.NodeVisitor):
         if isinstance(node.op, (ast.Add, ast.Sub)):
             if isinstance(node.target, (ast.Name, ast.Subscript)):
                 tgt_type = self._get_expr_type(node.target)
-                if isinstance(node.value, (ast.Name, ast.Subscript)):
-                    val_type = self._get_expr_type(node.value)
+                val_type = self._get_expr_type(node.value)
+                if val_type is not None:
                     constraint = TypeEqConstraint(tgt_type, val_type, node)
                     self.type_constraints.append(constraint)
                 else:
@@ -222,6 +222,24 @@ class WalkRulesVisitor(ast.NodeVisitor):
                 else:
                     raise NotImplementedError(
                         "Only name and subscripted targets are implemented")
+
+    def visit_Compare(self, node: ast.Compare) -> None:
+        self.generic_visit(node)
+
+        # Map these comparisons into some triples because `ast.Compare` has a
+        # very, very odd design
+        cmp_triples = [(node.left, node.ops[0], node.comparators[0])]
+        if len(node.ops) >= 2:
+            cmp_triples += \
+                [(l, o, r) for l, o, r in
+                 zip(node.comparators, node.ops[1:], node.comparators[1:])]
+
+        for l, o, r in cmp_triples:
+            l_type = self._get_expr_type(l)
+            r_type = self._get_expr_type(r)
+            if l_type is not None and r_type is not None:
+                self.type_constraints.append(
+                    TypeEqConstraint(l_type, r_type, node))
 
     def _get_expr_type(self, expr: ast.expr, bake_fresh=False) \
             -> Optional[Type]:
