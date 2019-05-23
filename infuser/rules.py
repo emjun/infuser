@@ -2,7 +2,7 @@ import ast
 from dataclasses import dataclass
 import logging
 import symtable
-from typing import Iterable, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
 from .abstracttypes import Type, SymbolicAbstractType, \
     PandasModuleType, DataFrameClsType, CallableType, TypeVar, ExtraCol
@@ -318,9 +318,3 @@ def accum_string_subscripts(expr: ast.Subscript) -> Tuple[ast.AST, List[str]]:
         expr = expr.value
     return expr, subs
 
-
-def walk_rules(root_node: ast.AST, table: symtable.SymbolTable) \
-        -> Iterable[TypeEqConstraint]:
-    visitor = WalkRulesVisitor(table)
-    visitor.visit(root_node)
-    return visitor.type_constraints
