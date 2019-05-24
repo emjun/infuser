@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from itertools import count, chain
-from typing import Sequence, Union, Optional, Tuple, FrozenSet
+import typing
+from typing import Sequence, Union, Optional, FrozenSet
 
 _fresh_typename_counter = count(0)
 
@@ -51,10 +52,24 @@ class SymbolicAbstractType(Type):
         return self.typename
 
 
+@dataclass(eq=True, frozen=True)
+class TupleType(Type):
+    """Param. poly. type for Python tuples."""
+    element_types: typing.Tuple[Union[Type, TypeVar]]
+
+    @property
+    def type_parameters(self) -> Sequence[Union[TypeVar, "Type"]]:
+        return self.element_types
+
+    def __str__(self):
+        inner = ",".join(str(x) for x in self.element_types)
+        return f"<{inner}>"
+
+
 @dataclass(frozen=True)
 class ExtraCol:
     arg: Union[int, str]
-    col_names: Tuple[str]
+    col_names: typing.Tuple[str]
     col_type: Union[Type, TypeVar]
 
     def __str__(self):
@@ -65,7 +80,7 @@ class ExtraCol:
 class CallableType(Type):
     "Type for functions and other callables. The only parametric type we have."
 
-    arg_types: Tuple[Union[Type, TypeVar], ...]
+    arg_types: typing.Tuple[Union[Type, TypeVar], ...]
     return_type: Optional[Union[Type, TypeVar]]
     "Either the return type of the function or `None` if void/unit."
 

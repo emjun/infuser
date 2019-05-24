@@ -5,8 +5,9 @@ import logging
 import symtable
 from typing import List, Optional, Tuple
 
-from .abstracttypes import Type, SymbolicAbstractType, \
-    PandasModuleType, DataFrameClsType, CallableType, TypeVar, ExtraCol
+from .abstracttypes import Type, SymbolicAbstractType, PandasModuleType, \
+    DataFrameClsType, CallableType, TypeVar, ExtraCol, TupleType, \
+    TupleType as tTuple
 from .typeenv import TypingEnvironment, SymbolTypeReferant, ColumnTypeReferant
 
 logger = logging.getLogger(__name__)
@@ -178,9 +179,14 @@ class WalkRulesVisitor(ast.NodeVisitor):
 
         self.generic_visit(node)
 
-        if any(isinstance(t, ast.Tuple) for t in node.targets):
-            raise NotImplementedError("Destructuring assignment left-hand "
-                                      "sides are not supported")
+        # if any(isinstance(t, ast.Tuple) for t in node.targets):
+        #     # There are two cases where we will destructure:
+        #     #  1. where the right-hand side is a tuple and we can one-to-one
+        #     #     constrain the types; or
+        #     #  2. when it's not, in which case we'll just assign new abstract
+        #     #     types to the left-hand side.
+        #     raise NotImplementedError("Destructuring assignment left-hand "
+        #                               "sides are not supported")
 
         if isinstance(node.value, ast.Call) and isinstance(
                 self._get_expr_type(node.value.func), DataFrameClsType):
@@ -216,10 +222,13 @@ class WalkRulesVisitor(ast.NodeVisitor):
                     # Copy type and all its subscripts
                     t_sym_ref = SymbolTypeReferant(
                         self._symtable_stack[-1].lookup(t.id))
+                    type_env.remove_assignments(t_sym_ref)
+                    if isinstance(node.value, ast.Name):
+                        # TODO: What about nested subscripts?
+                        v_sym_ref = SymbolTypeReferant(
+                            self._symtable_stack[-1].lookup(node.value.id))
+                        type_env.copy_assignments(t_sym_ref, v_sym_ref)
                     type_env[t_sym_ref] = value_type
-                    for r, ta in type_env.subscripted_name_closure(
-                            t_sym_ref).items():
-                        type_env[r.replace_symbol(t_sym_ref)] = ta
                 elif isinstance(t, ast.Subscript):
                     root, subscript_chain = accum_string_subscripts(t)
                     if not isinstance(root, ast.Name):
@@ -229,6 +238,24 @@ class WalkRulesVisitor(ast.NodeVisitor):
                             self._symtable_stack[-1].lookup(root.id)),
                         column_names=tuple(subscript_chain))
                     type_env[ref] = value_type
+                elif isinstance(t, ast.Tuple):
+                    if not all(isinstance(e, ast.Name) for e in t.elts):
+                        raise NotImplementedError("Only flat, named"
+                                                  "destructuring is supported")
+                    # Need to:
+                    #   - Update typing environment with tuple names
+                    new_symbolics = tuple(
+                        SymbolicAbstractType() for _ in t.elts)
+                    for e, fresh_type in zip(t.elts, new_symbolics):
+                        e_sym_ref = SymbolTypeReferant(
+                            self._symtable_stack[-1].lookup(e.id))
+                        type_env[e_sym_ref] = fresh_type
+                        for r, ta in type_env.subscripted_name_closure(
+                                e_sym_ref).items():
+                            type_env[r.replace_symbol(e_sym_ref)] = ta
+                    #   - Constrain a TupleType to right-hand side
+                    self.type_constraints.append(TypeEqConstraint(
+                        TupleType(new_symbolics), value_type, src_node=node))
                 else:
                     raise NotImplementedError(
                         f"Only name and subscripted targets are implemented; "
@@ -252,18 +279,18 @@ class WalkRulesVisitor(ast.NodeVisitor):
                 self.type_constraints.append(
                     TypeEqConstraint(l_type, r_type, node))
 
-    def _get_expr_type(self, expr: ast.expr, bake_fresh=False) \
+    def _get_expr_type(self, expr: ast.expr, bake_fresh=False,
+                       allow_non_load_name_lookups=False) \
             -> Optional[Type]:
         """Return a type assigned to `expr` or `None` if irrelevant to analysis
 
         Note that this requires the `_symtable_stack` to be set so that `expr`
-        in the latest symbol table. Only meant to be called during AST
-        visitation.
-        """
-        # TODO: Look up by symbol in the case of variable references
+        is in the latest symbol table. Only meant to be called during AST
+        visitation."""
 
         if isinstance(expr, ast.Name):
-            if not isinstance(expr.ctx, ast.Load):
+            if not isinstance(expr.ctx,
+                              ast.Load) and not allow_non_load_name_lookups:
                 raise ValueError(f"Looked up name {expr} with non-Load ctx")
             sym = SymbolTypeReferant(self._symtable_stack[-1].lookup(expr.id))
             to_r = self._type_environment_stack[-1].get(sym)
@@ -302,6 +329,21 @@ class WalkRulesVisitor(ast.NodeVisitor):
 
         if isinstance(expr, ast.Compare):
             logger.debug("Yielding a fresh symbolic type for comparison")
+            return SymbolicAbstractType()
+
+        if isinstance(expr, ast.Tuple):
+            if not isinstance(expr.ctx, ast.Load):
+                raise NotImplementedError("Tuple expressions only supported "
+                                          "in load contexts")
+            return tTuple(tuple(self._get_expr_type(e, bake_fresh=bake_fresh)
+                                for e in expr.elts))
+
+        if isinstance(expr, ast.List):
+            logger.debug("Yielding a fresh symbolic type for list")
+            return SymbolicAbstractType()
+
+        if isinstance(expr, ast.Dict):
+            logger.debug("Yielding a fresh symbolic type for dictionary")
             return SymbolicAbstractType()
 
         if isinstance(expr, ast.Attribute):

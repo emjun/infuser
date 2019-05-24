@@ -1,2 +1,3 @@
-from .main import TestAnalysisMain
-from .unification import TestUnification
+from .main import *
+from .rules import *
+from .unification import *

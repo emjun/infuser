@@ -1,10 +1,10 @@
 import ast
-from collections import defaultdict
 from itertools import combinations
 import symtable
 from typing import Iterable
 import unittest
 
+from infuser import unify
 from infuser.abstracttypes import TypeVar, Type
 from infuser.rules import WalkRulesVisitor, TypeEqConstraint
 from infuser.typeenv import TypingEnvironment, ColumnTypeReferant, \
@@ -14,19 +14,31 @@ from infuser.typeenv import TypingEnvironment, ColumnTypeReferant, \
 def types_connected(origin, destination,
                     env: TypingEnvironment,
                     constraints: Iterable[TypeEqConstraint]) -> bool:
-    graph = defaultdict(set)
-    for constraint in constraints:
-        graph[constraint.left].add(constraint.right)
-        graph[constraint.right].add(constraint.left)
+    # graph = defaultdict(set)
+    # for constraint in constraints:
+    #     graph[constraint.left].add(constraint.right)
+    #     graph[constraint.right].add(constraint.left)
+    #
+    # visited, queue = set(), [origin]
+    # while queue:
+    #     vertex = queue.pop(0)
+    #     if vertex == destination:
+    #         return True
+    #     if vertex not in visited:
+    #         visited.add(vertex)
+    #         queue.extend(graph[vertex] - visited)
+    # return False
 
-    visited, queue = set(), [origin]
-    while queue:
-        vertex = queue.pop(0)
-        if vertex == destination:
-            return True
-        if vertex not in visited:
-            visited.add(vertex)
-            queue.extend(graph[vertex] - visited)
+    if origin == destination:
+        return True
+    substitutions = unify(constraints)
+    if origin in substitutions and destination in substitutions and \
+            substitutions[origin] == substitutions[destination]:
+        return True
+    elif origin == substitutions.get(destination):
+        return True
+    elif substitutions.get(origin) == destination:
+        return True
     return False
 
 
@@ -66,6 +78,38 @@ class TestRules(unittest.TestCase):
             self.assertEqual(expected_type_cnt, len(visitor.type_environment))
             for a, b in combinations(visitor.type_environment.values(), 2):
                 self.assertTrue(self.types_connected(a, b, visitor))
+
+    def test_tuple_with_intermediate_pseudo_erasure(self):
+        # Please enjoy this test name of nonsense words.
+        code_str = "x = 1; y = 2; a = (x, y); b = a; i, j = b"
+
+        root_node = ast.parse(code_str, '<unknown>', 'exec')
+        table = symtable.symtable(code_str, '<unknown>', 'exec')
+
+        # Get the symbols corresponding to `x`, `y`, `i`, and `j`
+        x_s, y_s, i_s, j_s = [table.lookup(n) for n in "xyij"]
+
+        visitor = WalkRulesVisitor(table)
+        visitor.visit(root_node)
+
+        x_t, y_t, i_t, j_t = [visitor.type_environment[SymbolTypeReferant(s)]
+                              for s in (x_s, y_s, i_s, j_s)]
+        self.assertTrue(self.types_connected(i_t, x_t, visitor))
+        self.assertTrue(self.types_connected(j_t, y_t, visitor))
+
+    def test_subscripts_are_assigned_properly_during_destructuring(self):
+        code_str = "x = {}; y = {}; x['Hi'] = 1; y['Bye'] = x['Hi']; y = {}"
+        root_node = ast.parse(code_str, '<unknown>', 'exec')
+        table = symtable.symtable(code_str, '<unknown>', 'exec')
+        visitor = WalkRulesVisitor(table)
+        visitor.visit(root_node)
+
+        # There should be four things in the typing environment and none of
+        # them should have the same type
+        self.assertEqual(3, len(visitor.type_environment))
+        for a, b in combinations(visitor.type_environment.values(), 2):
+            self.assertFalse(self.types_connected(a, b, visitor))
+
 
     def test_types_abandoned_on_reassign(self):
         code_str = "x = 2; y = x; y = 2"

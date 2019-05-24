@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from symtable import Symbol
-from typing import Mapping, Union, Tuple, TypeVar, MutableMapping
+from typing import Mapping, Union, Tuple, TypeVar, MutableMapping, List
 
 from .abstracttypes import Type, SymbolicAbstractType
 
@@ -49,6 +49,34 @@ class TypingEnvironment(dict,
         if k not in self:
             self[k] = SymbolicAbstractType()
         return self[k]
+
+    def remove_assignments(self, sym: SymbolTypeReferant) -> None:
+        to_remove: List[TypeReferant] = [sym]
+        to_remove += list(self.subscripted_name_closure(sym))
+        for ref in to_remove:
+            if ref in self:
+                del self[ref]
+
+    def copy_assignments(self, orig: SymbolTypeReferant,
+                         novel: SymbolTypeReferant) -> None:
+        "Replace `orig` and its subscripts with those of `novel`."
+
+        # Remove all `from` and subscripts
+        keys_to_remove = []
+        for k, v in self.items():
+            if isinstance(k, ColumnTypeReferant) and k.symbol == orig:
+                keys_to_remove.append(k)
+            elif k == orig:
+                keys_to_remove.append(k)
+        for k in keys_to_remove:
+            del self[k]
+
+        # Copy `novel` and subscripts to `orig`
+        for k, v in self.items():
+            if isinstance(k, ColumnTypeReferant) and k.symbol == novel:
+                self[k.replace_symbol(novel)] = v
+            elif k == orig:
+                self[novel] = v
 
     def subscripted_name_closure(self, base: TypeReferant) \
             -> Mapping[ColumnTypeReferant, Type]:

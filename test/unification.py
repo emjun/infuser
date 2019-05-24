@@ -1,6 +1,6 @@
 import unittest
 
-from infuser.abstracttypes import SymbolicAbstractType, CallableType
+from infuser.abstracttypes import SymbolicAbstractType, CallableType, TupleType
 from infuser.rules import TypeEqConstraint
 from infuser.unification import unify
 
@@ -33,3 +33,13 @@ class TestUnification(unittest.TestCase):
                           extra_cols=frozenset())
         substitutions = unify([TypeEqConstraint(c1, c2, src_node=None)])
         self.assertTrue((substitutions == {c: b}) or (substitutions == {b: c}))
+
+    def test_unification_of_parameterized_types_with_intervening_symbolic(self):
+        a, b, c = [SymbolicAbstractType() for _ in range(3)]
+        intervener = SymbolicAbstractType()
+        tup1 = TupleType((a, b))
+        tup2 = TupleType((c, b))
+        substitutions = unify([
+            TypeEqConstraint(tup1, intervener, src_node=None),
+            TypeEqConstraint(tup2, intervener, src_node=None)])
+        self.assertTrue(substitutions.get(a) == c or substitutions.get(c) == a)
