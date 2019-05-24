@@ -1,4 +1,5 @@
 import ast
+import builtins
 from dataclasses import dataclass
 import logging
 import symtable
@@ -81,12 +82,17 @@ class WalkRulesVisitor(ast.NodeVisitor):
         if not isinstance(node.func, ast.Name):
             return
 
+        func_id = node.func.id
+        if func_id in dir(builtins) and callable(getattr(builtins, func_id)):
+            return
+
         # Look up the function in symbol table and our type env.
-        func_sym = self._symtable_stack[-1].lookup(node.func.id)
+        func_sym = self._symtable_stack[-1].lookup(func_id)
         func_type: Optional[CallableType] = \
             self._type_environment_stack[-1].get(SymbolTypeReferant(func_sym))
         if func_type is None:
-            raise ValueError(f"Called undefined function {node.func.id}")
+            raise ValueError(f"Called undefined function {func_id}")
+
         for extra_col in func_type.extra_cols:
             if isinstance(extra_col.arg, int):
                 node_arg = node.args[extra_col.arg]
@@ -172,6 +178,10 @@ class WalkRulesVisitor(ast.NodeVisitor):
 
         self.generic_visit(node)
 
+        if any(isinstance(t, ast.Tuple) for t in node.targets):
+            raise NotImplementedError("Destructuring assignment left-hand "
+                                      "sides are not supported")
+
         if isinstance(node.value, ast.Call) and isinstance(
                 self._get_expr_type(node.value.func), DataFrameClsType):
             # TODO: Implement DataFrame calls
@@ -221,7 +231,8 @@ class WalkRulesVisitor(ast.NodeVisitor):
                     type_env[ref] = value_type
                 else:
                     raise NotImplementedError(
-                        "Only name and subscripted targets are implemented")
+                        f"Only name and subscripted targets are implemented; "
+                        f"not {type(t)}")
 
     def visit_Compare(self, node: ast.Compare) -> None:
         self.generic_visit(node)
@@ -287,6 +298,10 @@ class WalkRulesVisitor(ast.NodeVisitor):
 
         if isinstance(expr, ast.Call):
             logger.debug("Yielding a fresh symbolic type for call")
+            return SymbolicAbstractType()
+
+        if isinstance(expr, ast.Compare):
+            logger.debug("Yielding a fresh symbolic type for comparison")
             return SymbolicAbstractType()
 
         if isinstance(expr, ast.Attribute):
