@@ -23,6 +23,14 @@ def analysis_main(client: IO[str]):
     visitor = WalkRulesVisitor(table)
     visitor.visit(client_ast)
 
+    # Complain if no stages were found
+    if sum(1 for k in visitor.type_constraints if k is not None) == 0:
+        print("No top-level stages found. (Note that Infuser doesn't support "
+              "stage headings inside `if __name__ == '__main__'` blocks.)",
+              file=sys.stderr)
+        return
+
+    # Okay. Time for the real analysis
     type_env = visitor.type_environment
     new_envs = []
     for stage in STAGES:
@@ -34,5 +42,5 @@ def analysis_main(client: IO[str]):
                                                        2):
         for name in set(env_a.keys()) & set(env_b.keys()):
             if env_a[name] != env_b[name]:
-                print(f"{stg_a} and {stg_b} disagree about {name}",
-                      file=sys.stderr)
+                # TODO: Factor out the warnings I/O for easier I/O testing
+                print(f"{stg_a} and {stg_b} disagree about {name}")
