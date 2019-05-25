@@ -14,7 +14,9 @@ class TypeVar:
     def replace_type(self, old: Union["Type", "TypeVar"],
                      new: Union["Type", "TypeVar"]) \
             -> Union["Type", "TypeVar"]:
-        raise NotImplementedError()
+        if old == self:
+            return new
+        return self
 
     def __hash__(self):
         return hash((self.name, id(self)))
@@ -117,9 +119,12 @@ class CallableType(Type):
                      new: Union[Type, TypeVar]) -> Union[Type, TypeVar]:
         if old == self:
             return new
+        new_rt = self.return_type
+        if new_rt is not None:
+            new_rt = new_rt.replace_type(old, new)
         return CallableType(
             arg_types=tuple(a.replace_type(old, new) for a in self.arg_types),
-            return_type=self.return_type.replace_symbols(old, new),
+            return_type=new_rt,
             extra_cols=self.extra_cols)
 
     def __str__(self):
