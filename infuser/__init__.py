@@ -18,7 +18,7 @@ def analysis_main(client: IO[str]):
     visitor.type_environment
     visitor.type_constraints
 
-    type_mapping = unify(visitor.type_constraints)
+    type_mapping = unify(visitor.type_constraints[None])
     print(type_mapping)
 
 

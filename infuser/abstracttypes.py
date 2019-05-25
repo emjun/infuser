@@ -55,7 +55,7 @@ class SymbolicAbstractType(Type):
 @dataclass(eq=True, frozen=True)
 class TupleType(Type):
     """Param. poly. type for Python tuples."""
-    element_types: typing.Tuple[Union[Type, TypeVar]]
+    element_types: typing.Tuple[Union[Type, TypeVar], ...]
 
     @property
     def type_parameters(self) -> Sequence[Union[TypeVar, "Type"]]:

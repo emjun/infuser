@@ -217,12 +217,30 @@ mod(df)"""]
                                                  type_env[df_price2_ref],
                                                  visitor))
 
+    def test_stages_are_split(self):
+        code_str = "x = 1; y = 2; 'WRANGLING'; z = x + y"
+        root_node = ast.parse(code_str, '<unknown>', 'exec')
+        table = symtable.symtable(code_str, '<unknown>', 'exec')
+        visitor = WalkRulesVisitor(table)
+        visitor.visit(root_node)
+
+        self.assertEqual({"WRANGLING"}, set(visitor.type_constraints))
+        wrang_cs = visitor.type_constraints["WRANGLING"]
+        self.assertEqual(2, len(wrang_cs))
+
+        x_sr, y_sr = [SymbolTypeReferant(table.lookup(n)) for n in "xy"]
+        x_t, y_t = [visitor.type_environment[sr] for sr in (x_sr, y_sr)]
+        self.assertTrue(self.types_connected(x_t, y_t, visitor,
+                                             stage="WRANGLING"))
+
+        self.assertEqual(0, len(visitor.type_constraints[None]))
+
     @staticmethod
-    def types_connected(a, b, visitor: WalkRulesVisitor) -> bool:
+    def types_connected(a, b, visitor: WalkRulesVisitor, stage=None) -> bool:
         if not isinstance(a, (Type, TypeVar)):
             a = visitor._get_expr_type(a)
         if not isinstance(b, (Type, TypeVar)):
             b = visitor._get_expr_type(b)
         return types_connected(a, b,
                                visitor.type_environment,
-                               visitor.type_constraints)
+                               visitor.type_constraints[stage])

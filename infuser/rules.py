@@ -1,9 +1,10 @@
 import ast
 import builtins
+from collections import defaultdict
 from dataclasses import dataclass
 import logging
 import symtable
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Mapping, Set
 
 from .abstracttypes import Type, SymbolicAbstractType, PandasModuleType, \
     DataFrameClsType, CallableType, TypeVar, ExtraCol, TupleType, \
@@ -11,6 +12,8 @@ from .abstracttypes import Type, SymbolicAbstractType, PandasModuleType, \
 from .typeenv import TypingEnvironment, SymbolTypeReferant, ColumnTypeReferant
 
 logger = logging.getLogger(__name__)
+
+STAGES = frozenset(["ANALYSIS", "WRANGLING"])
 
 
 class InfuserSyntaxError(Exception):
@@ -33,7 +36,8 @@ class TypeEqConstraint:
 
 
 class WalkRulesVisitor(ast.NodeVisitor):
-    type_constraints: List[TypeEqConstraint]
+    type_constraints: Mapping[Optional[str], Set[TypeEqConstraint]]
+    "Map from stage descriptions (incl. None) to iterables of constraints."
 
     _type_environment_stack: List[TypingEnvironment]
     "Map from symbols to AbstractTypes. Updated during visitation."
@@ -43,18 +47,30 @@ class WalkRulesVisitor(ast.NodeVisitor):
     _return_types: List[List[Type]]
     "Stack of collections of types of return expressions from `FunctionDef`s."
 
+    _current_stage: Optional[str]
+    "String describing current stage being visited; `None` if no stage entered."
+
     def __init__(self, sym_table: symtable.SymbolTable):
         super().__init__()
-        self.type_constraints = []  # we accumulate constraints for client here
+        self.type_constraints = defaultdict(set)
         self._type_environment_stack = [TypingEnvironment()]
         self._symtable_stack: List[symtable.SymbolTable] = [sym_table]
         self._return_types = []
+        self._current_stage = None
 
     @property
     def type_environment(self) -> TypingEnvironment:
         return self._type_environment_stack[0]
 
-    def visit_Import(self, node: ast.Import):
+    def visit_Module(self, node: ast.Module) -> None:
+        for stmt in node.body:
+            if isinstance(stmt, ast.Expr) \
+                    and isinstance(stmt.value, ast.Str) \
+                    and stmt.value.s in STAGES:
+                self._current_stage = stmt.value.s
+            self.visit(stmt)
+
+    def visit_Import(self, node: ast.Import) -> None:
         for a in node.names:
             if a.name == "pandas":
                 sym_name = a.name if a.asname is None else a.asname
@@ -99,14 +115,14 @@ class WalkRulesVisitor(ast.NodeVisitor):
                 node_arg = node.args[extra_col.arg]
                 # We could also extend subscripts
                 if not isinstance(node_arg, ast.Name):
-                    logger.warn(f"Only name arguments supported with "
-                                f"constraints; got {node_arg}")
+                    logger.warning(f"Only name arguments supported with "
+                                   f"constraints; got {node_arg}")
                     continue
                 name_sym = self._symtable_stack[-1].lookup(node_arg.id)
                 ref = ColumnTypeReferant(symbol=SymbolTypeReferant(name_sym),
                                          column_names=extra_col.col_names)
                 prev_type = self._type_environment_stack[-1].get_or_bake(ref)
-                self.type_constraints.append(
+                self._push_constraint(
                     TypeEqConstraint(prev_type, extra_col.col_type, node))
             else:
                 raise NotImplementedError("Only position args supported so far")
@@ -164,7 +180,7 @@ class WalkRulesVisitor(ast.NodeVisitor):
                 val_type = self._get_expr_type(node.value)
                 if val_type is not None:
                     constraint = TypeEqConstraint(tgt_type, val_type, node)
-                    self.type_constraints.append(constraint)
+                    self._push_constraint(constraint)
                 else:
                     logger.debug("Skipping AugAssign from value type "
                                  "%s", type(node.value))
@@ -254,12 +270,20 @@ class WalkRulesVisitor(ast.NodeVisitor):
                                 e_sym_ref).items():
                             type_env[r.replace_symbol(e_sym_ref)] = ta
                     #   - Constrain a TupleType to right-hand side
-                    self.type_constraints.append(TypeEqConstraint(
+                    self._push_constraint(TypeEqConstraint(
                         TupleType(new_symbolics), value_type, src_node=node))
                 else:
                     raise NotImplementedError(
                         f"Only name and subscripted targets are implemented; "
                         f"not {type(t)}")
+
+    def visit_BinOp(self, node: ast.BinOp) -> None:
+        self.generic_visit(node)
+        if isinstance(node.op, (ast.Add, ast.Sub)):
+            etype = self._get_expr_type(node, bake_fresh=True)
+            for x in [node.left, node.right]:
+                x = self._get_expr_type(x, bake_fresh=True)
+                self._push_constraint(TypeEqConstraint(x, etype, src_node=node))
 
     def visit_Compare(self, node: ast.Compare) -> None:
         self.generic_visit(node)
@@ -276,8 +300,9 @@ class WalkRulesVisitor(ast.NodeVisitor):
             l_type = self._get_expr_type(l)
             r_type = self._get_expr_type(r)
             if l_type is not None and r_type is not None:
-                self.type_constraints.append(
+                self._push_constraint(
                     TypeEqConstraint(l_type, r_type, node))
+
 
     def _get_expr_type(self, expr: ast.expr, bake_fresh=False,
                        allow_non_load_name_lookups=False) \
@@ -285,9 +310,22 @@ class WalkRulesVisitor(ast.NodeVisitor):
         """Return a type assigned to `expr` or `None` if irrelevant to analysis
 
         Note that this requires the `_symtable_stack` to be set so that `expr`
-        is in the latest symbol table. Only meant to be called during AST
-        visitation."""
+        is in the latest symbol table for any expression on which this method
+        hadn't been called already. For that reason, it's only meant to be
+        called during AST visitation.
 
+        Note that this may create new type constraints as a side effect.
+        """
+        cached_type = getattr(expr, "_infuser_expr_type", None)
+        if cached_type is not None:
+            return cached_type
+        new_type = self._make_expr_type(
+            expr, bake_fresh, allow_non_load_name_lookups)
+        setattr(expr, "_infuser_expr_type", new_type)
+        return new_type
+
+    def _make_expr_type(self, expr: ast.expr, bake_fresh: bool,
+                        allow_non_load_name_lookups: bool) -> Optional[Type]:
         if isinstance(expr, ast.Name):
             if not isinstance(expr.ctx,
                               ast.Load) and not allow_non_load_name_lookups:
@@ -328,6 +366,7 @@ class WalkRulesVisitor(ast.NodeVisitor):
             return SymbolicAbstractType()
 
         if isinstance(expr, ast.Compare):
+            # TODO: This isn't right. This should unify.
             logger.debug("Yielding a fresh symbolic type for comparison")
             return SymbolicAbstractType()
 
@@ -344,6 +383,9 @@ class WalkRulesVisitor(ast.NodeVisitor):
 
         if isinstance(expr, ast.Dict):
             logger.debug("Yielding a fresh symbolic type for dictionary")
+            return SymbolicAbstractType()
+
+        if isinstance(expr, ast.BinOp):
             return SymbolicAbstractType()
 
         if isinstance(expr, ast.Attribute):
@@ -366,6 +408,9 @@ class WalkRulesVisitor(ast.NodeVisitor):
     def _pop_scope(self) -> None:
         self._symtable_stack.pop()
         self._type_environment_stack.pop()
+
+    def _push_constraint(self, c: TypeEqConstraint) -> None:
+        self.type_constraints[self._current_stage].add(c)
 
 
 def accum_string_subscripts(expr: ast.Subscript) -> Tuple[ast.AST, List[str]]:
