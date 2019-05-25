@@ -209,28 +209,28 @@ class WalkRulesVisitor(ast.NodeVisitor):
                 self._get_expr_type(node.value.func), DataFrameClsType):
             # TODO: Implement DataFrame calls
             call = node.value
-            possible_data_asts = [k for k in call.keywords if k.arg == "data"]
-            if len(possible_data_asts) == 0:
-                raise NotImplementedError("DataFrame not given `data`")
-            elif len(possible_data_asts) >= 2:
+            possible_data_asts = call.args[:1]  # first arg is `data`
+            possible_data_asts += [k for k in call.keywords if k.arg == "data"]
+            if len(possible_data_asts) >= 2:
                 raise Exception("DataFrame given `data` twice")
-            data_ast = possible_data_asts[0].value
-            if not isinstance(data_ast, ast.Dict):
-                raise NotImplementedError("Non-dict `data` unsupported")
-            for k, v in zip(data_ast.keys, data_ast.values):
-                # Assign a subscript-extended reference to a fresh type for
-                # every target and `data` key literal
-                if k is None:
-                    raise NotImplementedError("dict `**` unsupported")
-                for t in node.targets:
-                    if isinstance(t, ast.Name):
-                        t_sym_ref = SymbolTypeReferant(
-                            self._symtable_stack[-1].lookup(t.id))
-                        type_env[t_sym_ref.add_subscript(k.s)] = \
-                            SymbolicAbstractType()
-                    else:
-                        raise NotImplementedError(
-                            "Only name targets are implemented")
+            elif len(possible_data_asts) >= 1:
+                data_ast = possible_data_asts[0].value
+                if not isinstance(data_ast, ast.Dict):
+                    raise NotImplementedError("Non-dict `data` unsupported")
+                for k, v in zip(data_ast.keys, data_ast.values):
+                    # Assign a subscript-extended reference to a fresh type for
+                    # every target and `data` key literal
+                    if k is None:
+                        raise NotImplementedError("dict `**` unsupported")
+                    for t in node.targets:
+                        if isinstance(t, ast.Name):
+                            t_sym_ref = SymbolTypeReferant(
+                                self._symtable_stack[-1].lookup(t.id))
+                            type_env[t_sym_ref.add_subscript(k.s)] = \
+                                SymbolicAbstractType()
+                        else:
+                            raise NotImplementedError(
+                                "Only name targets are implemented")
         else:
             value_type = self._get_expr_type(node.value, bake_fresh=True)
 
