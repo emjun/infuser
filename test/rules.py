@@ -7,28 +7,12 @@ import unittest
 from infuser import unify
 from infuser.abstracttypes import TypeVar, Type
 from infuser.rules import WalkRulesVisitor, TypeEqConstraint
-from infuser.typeenv import TypingEnvironment, ColumnTypeReferant, \
+from infuser.typeenv import ColumnTypeReferant, \
     SymbolTypeReferant
 
 
 def types_connected(origin, destination,
-                    env: TypingEnvironment,
                     constraints: Iterable[TypeEqConstraint]) -> bool:
-    # graph = defaultdict(set)
-    # for constraint in constraints:
-    #     graph[constraint.left].add(constraint.right)
-    #     graph[constraint.right].add(constraint.left)
-    #
-    # visited, queue = set(), [origin]
-    # while queue:
-    #     vertex = queue.pop(0)
-    #     if vertex == destination:
-    #         return True
-    #     if vertex not in visited:
-    #         visited.add(vertex)
-    #         queue.extend(graph[vertex] - visited)
-    # return False
-
     if origin == destination:
         return True
     substitutions = unify(constraints)
@@ -242,5 +226,4 @@ mod(df)"""]
         if not isinstance(b, (Type, TypeVar)):
             b = visitor._get_expr_type(b)
         return types_connected(a, b,
-                               visitor.type_environment,
                                visitor.type_constraints[stage])
