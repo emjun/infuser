@@ -108,7 +108,8 @@ class WalkRulesVisitor(ast.NodeVisitor):
         func_type: Optional[CallableType] = \
             self._type_environment_stack[-1].get(SymbolTypeReferant(func_sym))
         if func_type is None:
-            raise ValueError(f"Called undefined function {func_id}")
+            logger.debug("Called undeclared function; adding no side effects")
+            return
 
         for extra_col in func_type.extra_cols:
             if isinstance(extra_col.arg, int):
@@ -277,6 +278,20 @@ class WalkRulesVisitor(ast.NodeVisitor):
                         f"Only name and subscripted targets are implemented; "
                         f"not {type(t)}")
 
+    def visit_Subscript(self, node: ast.Subscript) -> None:
+        # Any time we see a subscript with a name as its base, stick it in the
+        # typing environment if it's not already there
+        self.generic_visit(node)
+        root, subscript_chain = accum_string_subscripts(node)
+        if isinstance(root, ast.Name):
+            name_sym = self._symtable_stack[-1].lookup(root.id)
+            name_ref = SymbolTypeReferant(name_sym)
+            ref = ColumnTypeReferant(name_ref, subscript_chain)
+            if ref not in self.type_environment:
+                t = self._get_expr_type(node, bake_fresh=True,
+                                        allow_non_load_name_lookups=True)
+                self.type_environment[ref] = t
+
     def visit_BinOp(self, node: ast.BinOp) -> None:
         self.generic_visit(node)
         if isinstance(node.op, (ast.Add, ast.Sub)):
@@ -413,12 +428,12 @@ class WalkRulesVisitor(ast.NodeVisitor):
         self.type_constraints[self._current_stage].add(c)
 
 
-def accum_string_subscripts(expr: ast.Subscript) -> Tuple[ast.AST, List[str]]:
+def accum_string_subscripts(expr: ast.Subscript) \
+        -> Tuple[ast.AST, Tuple[str, ...]]:
     subs: List[str] = []
     while isinstance(expr, ast.Subscript) \
             and isinstance(expr.slice, ast.Index) \
             and isinstance(expr.slice.value, ast.Str):
         subs.insert(0, expr.slice.value.s)
         expr = expr.value
-    return expr, subs
-
+    return expr, tuple(subs)

@@ -1,8 +1,8 @@
-import os
 import glob
+import os
 import unittest
 
-from infuser import analysis_main
+from infuser.analysis import analysis_main
 
 
 class TestAnalysisMain(unittest.TestCase):

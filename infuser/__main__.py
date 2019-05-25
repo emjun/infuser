@@ -1,7 +1,7 @@
 import argparse
 import logging
 
-from . import analysis_main
+from .analysis import analysis_main
 
 logger = logging.getLogger(__name__)
 

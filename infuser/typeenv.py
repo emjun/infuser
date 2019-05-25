@@ -16,6 +16,9 @@ class TypeReferant:
 class SymbolTypeReferant(TypeReferant):
     symbol: Symbol
 
+    def __str__(self):
+        return f"SymbolTypeReferant({self.symbol.get_name()})"
+
     def add_subscript(self, str_sub: str) -> "ColumnTypeReferant":
         return ColumnTypeReferant(symbol=self, column_names=(str_sub,))
 
@@ -44,6 +47,9 @@ class TypingEnvironment(dict,
             -> None:
         assert isinstance(key, TypeReferant), f"key type was {type(key)}"
         super().__setitem__(key, value)
+
+    def __contains__(self, item):
+        return super().__contains__(item)
 
     def get_or_bake(self, k: TypeReferant) -> Union[Type, TypeVar]:
         if k not in self:

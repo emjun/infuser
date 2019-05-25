@@ -21,13 +21,13 @@ if __name__ == '__main__':
     # This should raise an error:  
     # Wrangling
     # NONE 
-    
-    # Analysis
+
+    "ANALYSIS"
     stats.ttest_ind(df['time'], df['accuracy'])
 
 
     # This should NOT raise an error:     
-    # Wrangling
+    "WRANGLING"
     ## There are many different ways to achieve the same kind of subsetting.
     groups = []
     conditions = ['a', 'b']

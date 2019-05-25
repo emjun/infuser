@@ -5,14 +5,14 @@ Created on Tue May  7 16:25:46 2019
 @author: Lukas Blass
 """
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 
-# WRANGLING
+"WRANGLING"
 data = pd.read_csv('data/timing.csv')
 print(data)
 
-# ANALYSIS
+"ANALYSIS"
 
 subjects = ['tax', 'tictactoe', 'triangle']
 approaches = ['forking'] #, 'caching', 'forking']

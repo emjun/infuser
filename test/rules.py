@@ -4,11 +4,11 @@ import symtable
 from typing import Iterable
 import unittest
 
-from infuser import unify
 from infuser.abstracttypes import TypeVar, Type
 from infuser.rules import WalkRulesVisitor, TypeEqConstraint
 from infuser.typeenv import ColumnTypeReferant, \
     SymbolTypeReferant
+from infuser.unification import unify
 
 
 def types_connected(origin, destination,
@@ -63,6 +63,30 @@ class TestRules(unittest.TestCase):
             for a, b in combinations(visitor.type_environment.values(), 2):
                 self.assertTrue(self.types_connected(a, b, visitor))
 
+    def test_constraints_on_unassigned_references(self):
+        examples = ["d = f(); d[d['col1'] == d['col2']]"]
+        for code_str in examples:
+            root_node = ast.parse(code_str, '<unknown>', 'exec')
+            table = symtable.symtable(code_str, '<unknown>', 'exec')
+            visitor = WalkRulesVisitor(table)
+            visitor.visit(root_node)
+
+            # Get the sub-exprs corresponding to the column assignment
+            subscript_exprs = [n for n in ast.walk(root_node)
+                               if isinstance(n, ast.Subscript)
+                               and isinstance(n.slice.value, ast.Str)]
+            assert len(subscript_exprs) == 2
+
+            # Make sure they're both present in the typing environment
+            for cn in ["col1", "col2"]:
+                self.assertTrue(
+                    ColumnTypeReferant(SymbolTypeReferant(table.lookup("d")),
+                                       (cn,)) in visitor.type_environment)
+
+            #  Make sure they're constrained to be equal
+            for a, b in combinations(subscript_exprs, 2):
+                self.assertTrue(self.types_connected(a, b, visitor))
+
     def test_tuple_with_intermediate_pseudo_erasure(self):
         # Please enjoy this test name of nonsense words.
         code_str = "x = 1; y = 2; a = (x, y); b = a; i, j = b"
@@ -109,8 +133,7 @@ class TestRules(unittest.TestCase):
         for a, b in combinations(visitor.type_environment.values(), 2):
             self.assertFalse(self.types_connected(a, b, visitor))
 
-    def test_immediate_unification_over_simple_straightline_assignment_examples(
-            self):
+    def test_overwriting_subscript_doesnt_connect_types(self):
         # Equivalent examples
         examples = [
             """
@@ -140,7 +163,7 @@ d["Price2"] = d["Price"]"""]
             visitor.visit(root_node)
 
             # Make sure that `d["Price"]` and `d["Price2"]` are equal
-            self.assertTrue(self.types_connected(p1_expr, p2_expr, visitor))
+            self.assertFalse(self.types_connected(p1_expr, p2_expr, visitor))
 
     def test_walk_rules_over_simple_assignment_examples_with_funcs(self):
         # Equivalent examples

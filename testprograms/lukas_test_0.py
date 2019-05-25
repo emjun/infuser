@@ -5,11 +5,11 @@ Created on Tue May  7 15:52:47 2019
 @author: Lukas Blass
 """
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 from scipy import stats
 
-# WRANGLING
+"WRANGLING"
 
 # gotta know this command or look it up
 data = pd.read_csv('data/data_0.csv')
@@ -17,7 +17,7 @@ data = pd.read_csv('data/data_0.csv')
 cond_a = data[data['condition'] == 'a']
 cond_b = data[data['condition'] == 'b']
 
-# ANALYSIS
+"ANALYSIS"
 
 # first do some hand calculations
 print('Mean, Median, Sigma for a:')
