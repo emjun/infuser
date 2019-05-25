@@ -1,5 +1,6 @@
 import json
 import sys
+from typing import Tuple, Sequence
 
 
 class CLIPrinter:
@@ -21,17 +22,20 @@ class CLIPrinter:
         self.print_json = print_json
         self.warnings_printed = 0
 
-    def warn(self, line: int, char_offset: int, text: str) -> None:
+    def warn(self, text: str, locations: Sequence[Tuple[int, int]]) -> None:
         if self.print_json:
-            pkg = {"line": line, "offset": char_offset, "warning": text}
+            pkg = {"warning": text,
+                   "locations": [{"line": l[0], "offset": l[1]}
+                                 for l in locations]}
             json.dump(pkg, sys.stdout)
             sys.stdout.write("\n")
         else:
             if self.warnings_printed > 0:
                 print()
-            line = self.src_code.splitlines()[line]
-            print(line)
-            print((" " * char_offset) + "^")
+            for line, char_offset in locations:
+                line = self.src_code.splitlines()[line]
+                print(line)
+                print((" " * char_offset) + "^")
             print((" " * min(2, char_offset)) + text)
         self.warnings_printed += 1
 

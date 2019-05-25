@@ -3,8 +3,9 @@ from itertools import combinations
 import logging
 import symtable
 import sys
-from typing import IO, TypeVar
+from typing import TypeVar
 
+from infuser.cli import CLIPrinter
 from .rules import WalkRulesVisitor, STAGES
 from .unification import unify
 
@@ -14,12 +15,9 @@ V = TypeVar("V")
 logger = logging.getLogger(__name__)
 
 
-def analysis_main(client: IO[str]):
-    client.seek(0)
-    code_str = client.read()
-
-    table = symtable.symtable(code_str, client.name, 'exec')
-    client_ast = ast.parse(code_str, client.name)
+def analysis_main(code_str: str, filename: str, printer: CLIPrinter) -> int:
+    table = symtable.symtable(code_str, filename, 'exec')
+    client_ast = ast.parse(code_str, filename)
     visitor = WalkRulesVisitor(table)
     visitor.visit(client_ast)
 
@@ -28,19 +26,28 @@ def analysis_main(client: IO[str]):
         print("No top-level stages found. (Note that Infuser doesn't support "
               "stage headings inside `if __name__ == '__main__'` blocks.)",
               file=sys.stderr)
-        return
+        return 1
 
     # Okay. Time for the real analysis
     type_env = visitor.type_environment
     new_envs = []
+    src_maps = []
     for stage in STAGES:
-        subs = unify(
+        subs, srcs = unify(
             visitor.type_constraints[None] | visitor.type_constraints[stage])
         new_envs.append(type_env.substitute_types(subs))
+        src_maps.append(srcs)
 
-    for (env_a, stg_a), (env_b, stg_b) in combinations(zip(new_envs, STAGES),
-                                                       2):
-        for name in set(env_a.keys()) & set(env_b.keys()):
-            if env_a[name] != env_b[name]:
+    for (e1, m1, s1), (e2, m2, s2) in \
+            combinations(zip(new_envs, src_maps, STAGES), 2):
+        for name in set(e1.keys()) & set(e2.keys()):
+            if e1[name] != e2[name]:
                 # TODO: Factor out the warnings I/O for easier I/O testing
-                print(f"{stg_a} and {stg_b} disagree about {name}")
+                ast1 = m1.get(e1[name], set()) | m1.get(e2[name], set())
+                ast2 = m2.get(e1[name], set()) | m2.get(e2[name], set())
+                text = f"{s1} and {s2} disagree about {name.display_str()}"
+                loc_set = set()
+                loc_set.update((x.lineno - 1, x.col_offset) for x in ast1)
+                loc_set.update((x.lineno - 1, x.col_offset) for x in ast2)
+                printer.warn(text, sorted(loc_set))
+    return 0

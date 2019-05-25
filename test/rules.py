@@ -8,14 +8,14 @@ from infuser.abstracttypes import TypeVar, Type
 from infuser.rules import WalkRulesVisitor, TypeEqConstraint
 from infuser.typeenv import ColumnTypeReferant, \
     SymbolTypeReferant
-from infuser.unification import unify
+from infuser.unification import unify_simple
 
 
 def types_connected(origin, destination,
                     constraints: Iterable[TypeEqConstraint]) -> bool:
     if origin == destination:
         return True
-    substitutions = unify(constraints)
+    substitutions = unify_simple(constraints)
     if origin in substitutions and destination in substitutions and \
             substitutions[origin] == substitutions[destination]:
         return True

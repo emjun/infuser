@@ -9,7 +9,9 @@ from .abstracttypes import Type, SymbolicAbstractType
 
 
 class TypeReferant:
-    pass
+
+    def display_str(self) -> str:
+        return str(self)
 
 
 @dataclass(eq=True, frozen=True)
@@ -21,6 +23,9 @@ class SymbolTypeReferant(TypeReferant):
 
     def add_subscript(self, str_sub: str) -> "ColumnTypeReferant":
         return ColumnTypeReferant(symbol=self, column_names=(str_sub,))
+
+    def display_str(self) -> str:
+        return f"`{self.symbol.get_name()}`"
 
 
 @dataclass(eq=True, frozen=True)
@@ -42,6 +47,11 @@ class ColumnTypeReferant(TypeReferant):
     def __str__(self):
         col_substr = ", ".join(self.column_names)
         return f"ColumnTypeReferant({str(self.symbol)}, {col_substr})"
+
+    def display_str(self) -> str:
+        col_bit = "['" + "']['".join(self.column_names) + "']"
+        return f"`{self.symbol.symbol.get_name()}{col_bit}`"
+
 
 
 class TypingEnvironment(dict,
