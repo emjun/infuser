@@ -11,6 +11,11 @@ class TypeVar:
         super().__init__()
         self.name = "TV" + str(next(_fresh_typename_counter))
 
+    def replace_type(self, old: Union["Type", "TypeVar"],
+                     new: Union["Type", "TypeVar"]) \
+            -> Union["Type", "TypeVar"]:
+        raise NotImplementedError()
+
     def __hash__(self):
         return hash((self.name, id(self)))
 
@@ -29,6 +34,10 @@ class Type:
     def __eq__(self, other):
         raise NotImplementedError()
 
+    def replace_type(self, old: Union["Type", TypeVar],
+                     new: Union["Type", TypeVar]) -> Union["Type", TypeVar]:
+        raise NotImplementedError()
+
 
 # TODO: There must be a better name than `SymbolicAbtractType`
 class SymbolicAbstractType(Type):
@@ -41,6 +50,12 @@ class SymbolicAbstractType(Type):
     @property
     def type_parameters(self) -> Sequence[Union[TypeVar, Type]]:
         return []
+
+    def replace_type(self, old: Union[Type, TypeVar],
+                     new: Union[Type, TypeVar]) -> Union[Type, TypeVar]:
+        if old == self:
+            return new
+        return self
 
     def __hash__(self):
         return hash((self.typename, id(self)))
@@ -60,6 +75,13 @@ class TupleType(Type):
     @property
     def type_parameters(self) -> Sequence[Union[TypeVar, "Type"]]:
         return self.element_types
+
+    def replace_type(self, old: Union[Type, TypeVar],
+                     new: Union[Type, TypeVar]) -> Union[Type, TypeVar]:
+        if old == self:
+            return new
+        return TupleType(tuple(e.replace_type(old, new)
+                               for e in self.element_types))
 
     def __str__(self):
         inner = ",".join(str(x) for x in self.element_types)
@@ -91,6 +113,15 @@ class CallableType(Type):
     def type_parameters(self) -> Sequence[Union[TypeVar, Type]]:
         return list(chain(self.arg_types, [self.return_type]))
 
+    def replace_type(self, old: Union[Type, TypeVar],
+                     new: Union[Type, TypeVar]) -> Union[Type, TypeVar]:
+        if old == self:
+            return new
+        return CallableType(
+            arg_types=tuple(a.replace_type(old, new) for a in self.arg_types),
+            return_type=self.return_type.replace_symbols(old, new),
+            extra_cols=self.extra_cols)
+
     def __str__(self):
         a = ", ".join(str(x) for x in self.arg_types)
         b = f"({a}) → {self.return_type}"
@@ -105,6 +136,12 @@ class PandasModuleType(Type):
     def type_parameters(self) -> Sequence[Union[TypeVar, Type]]:
         return []
 
+    def replace_type(self, old: Union[Type, TypeVar],
+                     new: Union[Type, TypeVar]) -> Union[Type, TypeVar]:
+        if old == self:
+            return new
+        return self
+
     def __eq__(self, other):
         return isinstance(other, PandasModuleType)
 
@@ -116,6 +153,12 @@ class DataFrameClsType(Type):
     @property
     def type_parameters(self) -> Sequence[Union[TypeVar, Type]]:
         return []
+
+    def replace_type(self, old: Union[Type, TypeVar],
+                     new: Union[Type, TypeVar]) -> Union[Type, TypeVar]:
+        if old == self:
+            return new
+        return self
 
     def __eq__(self, other):
         return isinstance(other, DataFrameClsType)

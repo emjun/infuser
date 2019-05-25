@@ -39,6 +39,10 @@ class ColumnTypeReferant(TypeReferant):
             return self.replace_symbol(SymbolTypeReferant(new))
         return ColumnTypeReferant(symbol=new, column_names=self.column_names)
 
+    def __str__(self):
+        col_substr = ", ".join(self.column_names)
+        return f"ColumnTypeReferant({str(self.symbol)}, {col_substr})"
+
 
 class TypingEnvironment(dict,
                         MutableMapping[TypeReferant, Union[Type, TypeVar]]):
@@ -47,9 +51,6 @@ class TypingEnvironment(dict,
             -> None:
         assert isinstance(key, TypeReferant), f"key type was {type(key)}"
         super().__setitem__(key, value)
-
-    def __contains__(self, item):
-        return super().__contains__(item)
 
     def get_or_bake(self, k: TypeReferant) -> Union[Type, TypeVar]:
         if k not in self:
@@ -91,3 +92,14 @@ class TypingEnvironment(dict,
                     if isinstance(k, ColumnTypeReferant) and k.symbol == base}
         else:
             raise NotImplementedError("Non-symbolic bases not implemented")
+
+    def substitute_types(
+            self, subs: Mapping[Union[Type, TypeVar], Union[Type, TypeVar]]) \
+            -> "TypingEnvironment":
+        new_types = {}
+        for k, v in self.items():
+            new_v = v
+            for old_type, new_type in subs.items():
+                new_v = new_v.replace_type(old_type, new_type)
+            new_types[k] = new_v
+        return TypingEnvironment(new_types)

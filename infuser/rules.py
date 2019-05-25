@@ -249,7 +249,7 @@ class WalkRulesVisitor(ast.NodeVisitor):
                 elif isinstance(t, ast.Subscript):
                     root, subscript_chain = accum_string_subscripts(t)
                     if not isinstance(root, ast.Name):
-                        return None
+                        return
                     ref = ColumnTypeReferant(
                         symbol=SymbolTypeReferant(
                             self._symtable_stack[-1].lookup(root.id)),
@@ -320,8 +320,7 @@ class WalkRulesVisitor(ast.NodeVisitor):
 
 
     def _get_expr_type(self, expr: ast.expr, bake_fresh=False,
-                       allow_non_load_name_lookups=False) \
-            -> Optional[Type]:
+                       allow_non_load_name_lookups=False) -> Type:
         """Return a type assigned to `expr` or `None` if irrelevant to analysis
 
         Note that this requires the `_symtable_stack` to be set so that `expr`
@@ -340,7 +339,7 @@ class WalkRulesVisitor(ast.NodeVisitor):
         return new_type
 
     def _make_expr_type(self, expr: ast.expr, bake_fresh: bool,
-                        allow_non_load_name_lookups: bool) -> Optional[Type]:
+                        allow_non_load_name_lookups: bool) -> Type:
         if isinstance(expr, ast.Name):
             if not isinstance(expr.ctx,
                               ast.Load) and not allow_non_load_name_lookups:
@@ -356,13 +355,16 @@ class WalkRulesVisitor(ast.NodeVisitor):
             if isinstance(value_type, PandasModuleType):
                 if expr.attr == "DataFrame":
                     return DataFrameClsType()
-            return None
+            logger.debug("Returning fresh abstract type for attribute")
+            return SymbolicAbstractType()
 
         if isinstance(expr, ast.Subscript):
             # The only subscripts we care about are chains of string literals.
             root, subscript_chain = accum_string_subscripts(expr)
             if not isinstance(root, ast.Name):
-                return None
+                logger.debug("Returning fresh abstract type for "
+                             "non-name-based subscript")
+                return SymbolicAbstractType()
             ref = ColumnTypeReferant(
                 symbol=SymbolTypeReferant(
                     self._symtable_stack[-1].lookup(root.id)),

@@ -1,10 +1,15 @@
 import ast
+from itertools import combinations
 import logging
 import symtable
-from typing import IO
+import sys
+from typing import IO, TypeVar
 
-from .rules import WalkRulesVisitor
+from .rules import WalkRulesVisitor, STAGES
 from .unification import unify
+
+T = TypeVar("T")
+V = TypeVar("V")
 
 logger = logging.getLogger(__name__)
 
@@ -18,10 +23,16 @@ def analysis_main(client: IO[str]):
     visitor = WalkRulesVisitor(table)
     visitor.visit(client_ast)
 
-    wrangling_subs = unify(
-        visitor.type_constraints[None] | visitor.type_constraints["WRANGLING"])
-    analysis_subs = unify(
-        visitor.type_constraints[None] | visitor.type_constraints["ANALYSIS"])
+    type_env = visitor.type_environment
+    new_envs = []
+    for stage in STAGES:
+        subs = unify(
+            visitor.type_constraints[None] | visitor.type_constraints[stage])
+        new_envs.append(type_env.substitute_types(subs))
 
-    pass
-    # TODO: Finish `analysis_main`
+    for (env_a, stg_a), (env_b, stg_b) in combinations(zip(new_envs, STAGES),
+                                                       2):
+        for name in set(env_a.keys()) & set(env_b.keys()):
+            if env_a[name] != env_b[name]:
+                print(f"{stg_a} and {stg_b} disagree about {name}",
+                      file=sys.stderr)
