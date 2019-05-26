@@ -179,6 +179,7 @@ class WalkRulesVisitor(ast.NodeVisitor):
         self.generic_visit(node)
 
         if any(isinstance(t, ast.Tuple) for t in node.targets):
+            import pdb; pdb.set_trace()
             raise NotImplementedError("Destructuring assignment left-hand "
                                       "sides are not supported")
 
