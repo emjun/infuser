@@ -5,6 +5,7 @@ Created on Tue May  7 15:52:47 2019
 @author: Lukas Blass
 """
 
+import os 
 import numpy as np
 import pandas as pd
 from scipy import stats
@@ -12,7 +13,12 @@ from scipy import stats
 "WRANGLING"
 
 # gotta know this command or look it up
-data = pd.read_csv('data/data_0.csv')
+base_path = '/Users/emjun/Git/infuser/testprograms/data'
+file_name = 'data_0.csv'
+file_path = os.path.join(base_path, file_name)
+# data = pd.read_csv('data/data_0.csv')
+data = pd.read_csv(file_path)
+import pdb; pdb.set_trace()
 
 cond_a = data[data['condition'] == 'a']
 cond_b = data[data['condition'] == 'b']

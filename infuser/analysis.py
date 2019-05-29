@@ -35,12 +35,16 @@ def analysis_main(code_str: str, filename: str, printer: CLIPrinter) -> int:
     for stage in STAGES:
         subs, srcs = unify(
             visitor.type_constraints[None] | visitor.type_constraints[stage])
+        for key in subs.keys(): 
+            val = subs[key]
+            import pdb; pdb.set_trace()    
         new_envs.append(type_env.substitute_types(subs))
         src_maps.append(srcs)
 
     for (e1, m1, s1), (e2, m2, s2) in \
             combinations(zip(new_envs, src_maps, STAGES), 2):
         for name in set(e1.keys()) & set(e2.keys()):
+            import pdb; pdb.set_trace()
             if e1[name] != e2[name]:
                 # TODO: Factor out the warnings I/O for easier I/O testing
                 ast1 = m1.get(e1[name], set()) | m1.get(e2[name], set())

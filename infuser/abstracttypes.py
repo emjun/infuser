@@ -68,6 +68,10 @@ class SymbolicAbstractType(Type):
     def __str__(self):
         return self.typename
 
+    # Add this to print the type when debugging
+    def __repr__(self):
+        return self.typename
+
 
 @dataclass(eq=True, frozen=True)
 class TupleType(Type):
