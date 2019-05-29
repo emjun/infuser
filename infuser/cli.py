@@ -32,8 +32,8 @@ class CLIPrinter:
         else:
             if self.warnings_printed > 0:
                 print()
-            for line, char_offset in locations:
-                line = self.src_code.splitlines()[line]
+            for line_no, char_offset in locations:
+                line = self.src_code.splitlines()[line_no]
                 print(line)
                 print((" " * char_offset) + "^")
             print((" " * min(2, char_offset)) + text)
