@@ -391,8 +391,8 @@ class WalkRulesVisitor(ast.NodeVisitor):
             try:
                 call_func_type = self._get_call_func_type(expr)
             except UndefinedFunctionError:
-                logger.warning("Yielding a fresh symbolic type for "
-                               "uninterp. func. call")
+                logger.debug("Yielding a fresh symbolic type for "
+                             "uninterpreted function call")
                 return SymbolicAbstractType()
             else:
                 return call_func_type.return_type
@@ -434,10 +434,10 @@ class WalkRulesVisitor(ast.NodeVisitor):
             return cached_type
 
         orig_func_type = self._get_expr_type(n.func)
-        if orig_func_type is None:
-            raise UndefinedFunctionError(f"{n.func} undefined")
-        assert isinstance(orig_func_type, CallableType)
-        site_func_type = orig_func_type.make_monomorphic({})
+        if isinstance(orig_func_type, CallableType):
+            site_func_type = orig_func_type.make_monomorphic({})
+        else:
+            raise UndefinedFunctionError(f"{n.func} undefined in scope")
 
         setattr(n, "_infuser_call_func_type", site_func_type)
         return site_func_type
