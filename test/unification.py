@@ -1,6 +1,7 @@
 import unittest
 
-from infuser.abstracttypes import SymbolicAbstractType, CallableType, TupleType
+from infuser.abstracttypes import SymbolicAbstractType, CallableType, TupleType, \
+    UnitType
 from infuser.rules import TypeEqConstraint
 from infuser.unification import unify_simple
 
@@ -27,9 +28,9 @@ class TestUnification(unittest.TestCase):
 
     def test_unify_with_parameterized_types(self):
         a, b, c = [SymbolicAbstractType() for _ in range(3)]
-        c1 = CallableType(arg_types=(a, b), return_type=None,
+        c1 = CallableType(arg_types=(a, b), return_type=UnitType(),
                           extra_cols=frozenset())
-        c2 = CallableType(arg_types=(a, c), return_type=None,
+        c2 = CallableType(arg_types=(a, c), return_type=UnitType(),
                           extra_cols=frozenset())
         substitutions = unify_simple([TypeEqConstraint(c1, c2, src_node=None)])
         self.assertTrue((substitutions == {c: b}) or (substitutions == {b: c}))

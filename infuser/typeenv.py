@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from symtable import Symbol
-from typing import Mapping, Union, Tuple, TypeVar, MutableMapping, List
+from typing import Mapping, Union, Tuple, MutableMapping, List
 
-from .abstracttypes import Type, SymbolicAbstractType
+from .abstracttypes import Type, TypeVar, SymbolicAbstractType
 
 
 # TODO: Make sure we're using "type signature" correctly
@@ -63,7 +63,11 @@ class TypingEnvironment(dict,
         super().__setitem__(key, value)
 
     def get_or_bake(self, k: TypeReferant) -> Union[Type, TypeVar]:
-        if k not in self:
+        """Return the assigned type for `k` or a fresh type or type variable."""
+        if isinstance(k, ColumnTypeReferant) and isinstance(
+                self.get(k.symbol, None), TypeVar):
+            self[k] = TypeVar()
+        elif k not in self:
             self[k] = SymbolicAbstractType()
         return self[k]
 

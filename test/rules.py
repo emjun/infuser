@@ -197,6 +197,45 @@ mod(df)"""]
                                                  type_env[df_price2_ref],
                                                  visitor))
 
+    def test_function_polymorphism_over_new_columns(self):
+        examples = [
+            """
+mapping1, mapping2 = {"Col": [1.]}, {"Col": [2.]}
+def dupe_col(d):
+    d["ColDuped"] = d["Col"]
+dupe_col(mapping1); dupe_col(mapping2)"""]
+
+        for code_str in examples:
+            root_node = ast.parse(code_str, '<unknown>', 'exec')
+            table = symtable.symtable(code_str, '<unknown>', 'exec')
+
+            # Build useful referants
+            m1_ref = SymbolTypeReferant(table.lookup("mapping1"))
+            m2_ref = SymbolTypeReferant(table.lookup("mapping2"))
+            m1_orig_col_ref = ColumnTypeReferant(m1_ref, ("Col",))
+            m2_orig_col_ref = ColumnTypeReferant(m2_ref, ("Col",))
+            m1_dupe_col_ref = ColumnTypeReferant(m1_ref, ("ColDuped",))
+            m2_dupe_col_ref = ColumnTypeReferant(m2_ref, ("ColDuped",))
+
+            # Make sure the duped columns are unified with the original,
+            # but not with each other
+            visitor = WalkRulesVisitor(table)
+            visitor.visit(root_node)
+            type_env = visitor.type_environment
+            self.assertTrue(self.types_connected(type_env[m1_orig_col_ref],
+                                                 type_env[m1_dupe_col_ref],
+                                                 visitor))
+            self.assertTrue(self.types_connected(type_env[m2_orig_col_ref],
+                                                 type_env[m2_dupe_col_ref],
+                                                 visitor))
+            self.assertFalse(self.types_connected(type_env[m1_dupe_col_ref],
+                                                  type_env[m2_dupe_col_ref],
+                                                  visitor))
+            self.assertFalse(self.types_connected(type_env[m1_orig_col_ref],
+                                                  type_env[m2_orig_col_ref],
+                                                  visitor))
+
+
     def test_type_eq_after_augmented_assignment(self):
         # Equivalent examples
         examples = [
