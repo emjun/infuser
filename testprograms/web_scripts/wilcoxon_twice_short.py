@@ -2,7 +2,7 @@ import pandas as pd
 from scipy import stats
 
 # WRANGLING
-df = pd.read_csv("blood_pressure.csv")
+df = pd.read_csv("../data/blood_pressure.csv")
 
 df[['bp_before','bp_after']].describe()
 

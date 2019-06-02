@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from scipy.stats import linregress
 
 # WRANGLING
-dataframe = pd.read_csv("scottish_hills.csv")
+dataframe = pd.read_csv("../data/scottish_hills.csv")
 
 x = dataframe.Height
 y = dataframe.Latitude
@@ -16,5 +16,3 @@ b = stats.intercept
 
 plt.scatter(x, y)
 plt.plot(x, m * x + b, color="red")   # I've added a color argument here
-
-plt.savefig("figure.png")

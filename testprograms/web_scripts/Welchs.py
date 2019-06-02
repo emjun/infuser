@@ -3,7 +3,8 @@ from scipy import stats
 
 # WRANGLING
 
-df= pd.read_csv("Iris_Data.csv")
+df = pd.read_excel("../data/iris_data.xlsx")
+print(df['species'])
 
 df.groupby("species")['petal_length'].describe()
 

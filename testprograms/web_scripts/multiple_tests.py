@@ -82,11 +82,11 @@ t_statistic, p_value = ttest_1samp(daily_intake, 7725)
 # p_value < 0.05 => alternative hypothesis:
 # data deviate significantly from the hypothesis that the mean
 # is 7725 at the 5% level of significance
-print "one-sample t-test", p_value
+print( "one-sample t-test", p_value)
 
 # one sample wilcoxon-test
 z_statistic, p_value = wilcoxon(daily_intake - 7725)
-print "one-sample wilcoxon-test", p_value
+print ("one-sample wilcoxon-test", p_value)
 
 
 # two-sample t-test
@@ -99,12 +99,12 @@ t_statistic, p_value = ttest_ind(group1, group2)
 
 # p_value < 0.05 => alternative hypothesis:
 # they don't have the same mean at the 5% significance level
-print "two-sample t-test", p_value
+print ("two-sample t-test", p_value)
 
 # two-sample wilcoxon test
 # a.k.a Mann Whitney U
 u, p_value = mannwhitneyu(group1, group2)
-print "two-sample wilcoxon-test", p_value
+print ("two-sample wilcoxon-test", p_value)
 
 
 
@@ -114,10 +114,10 @@ t_statistic, p_value = ttest_1samp(post - pre, 0)
 
 # p < 0.05 => alternative hypothesis:
 # the difference in mean is not equal to 0
-print "paired t-test", p_value
+print ("paired t-test", p_value)
 
 # alternative to paired t-test when data has an ordinary scale or when not
 # normally distributed
 z_statistic, p_value = wilcoxon(post - pre)
 
-print "paired wilcoxon-test", p_value
+print ("paired wilcoxon-test", p_value)
