@@ -8,7 +8,7 @@ from typing import List, Optional, Tuple, Mapping, Set
 
 from .abstracttypes import Type, SymbolicAbstractType, PandasModuleType, \
     DataFrameClsType, CallableType, TypeVar, ExtraCol, TupleType, \
-    TupleType as tTuple
+    TupleType as tTuple, UnitType
 from .typeenv import TypingEnvironment, SymbolTypeReferant, ColumnTypeReferant
 
 logger = logging.getLogger(__name__)
@@ -17,6 +17,10 @@ STAGES = frozenset(["ANALYSIS", "WRANGLING"])
 
 
 class InfuserSyntaxError(Exception):
+    pass
+
+
+class UndefinedFunctionError(Exception):
     pass
 
 
@@ -101,34 +105,38 @@ class WalkRulesVisitor(ast.NodeVisitor):
         if not isinstance(node.func, ast.Name):
             return
 
+        # Don't analyze calls to builtins
         func_id = node.func.id
         if func_id in dir(builtins) and callable(getattr(builtins, func_id)):
             return
 
-        # Look up the function in symbol table and our type env.
-        func_sym = self._symtable_stack[-1].lookup(func_id)
-        func_type: Optional[CallableType] = \
-            self._type_environment_stack[-1].get(SymbolTypeReferant(func_sym))
-        if func_type is None:
-            logger.debug("Called undeclared function; adding no side effects")
-            return
-
-        for extra_col in func_type.extra_cols:
-            if isinstance(extra_col.arg, int):
-                node_arg = node.args[extra_col.arg]
-                # We could also extend subscripts
-                if not isinstance(node_arg, ast.Name):
-                    logger.warning(f"Only name arguments supported with "
-                                   f"constraints; got {node_arg}")
-                    continue
-                name_sym = self._symtable_stack[-1].lookup(node_arg.id)
-                ref = ColumnTypeReferant(symbol=SymbolTypeReferant(name_sym),
-                                         column_names=extra_col.col_names)
-                prev_type = self._type_environment_stack[-1].get_or_bake(ref)
-                self._push_constraint(
-                    TypeEqConstraint(prev_type, extra_col.col_type, node))
-            else:
-                raise NotImplementedError("Only position args supported so far")
+        # Look up the function type *specialized to this call site*
+        try:
+            func_type = self._get_call_func_type(node)
+        except UndefinedFunctionError:
+            logger.debug(f"Treating {func_id} as uninterpreted function")
+        else:
+            for extra_col in func_type.extra_cols:
+                if isinstance(extra_col.arg, int):
+                    node_arg = node.args[extra_col.arg]
+                    # We could also extend subscripts
+                    if not isinstance(node_arg, ast.Name):
+                        logger.warning(f"Only name arguments supported with "
+                                       f"constraints; got {node_arg}")
+                        continue
+                    name_sym = self._symtable_stack[-1].lookup(node_arg.id)
+                    ref = ColumnTypeReferant(
+                        symbol=SymbolTypeReferant(name_sym),
+                        column_names=extra_col.col_names)
+                    prev_type = self._type_environment_stack[-1].get_or_bake(
+                        ref)
+                    assert isinstance(prev_type, Type)
+                    assert isinstance(extra_col.col_type, Type)
+                    self._push_constraint(
+                        TypeEqConstraint(prev_type, extra_col.col_type, node))
+                else:
+                    raise NotImplementedError(
+                        "Only position args supported so far")
 
     def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
         # TODO: Warn if function re-definition?
@@ -154,7 +162,8 @@ class WalkRulesVisitor(ast.NodeVisitor):
             self.visit(child)
 
         # Choose an arbitrary return type for the signature
-        rt = None
+        # TODO: Unify these with a type variable
+        rt = UnitType()
         if len(self._return_types[-1]):
             rt = self._return_types[-1][0]
 
@@ -165,7 +174,7 @@ class WalkRulesVisitor(ast.NodeVisitor):
             for sub, t in c.items():
                 extra_cols.add(ExtraCol(i, sub.column_names, t))
 
-        # TODO: Add global re-assignments to `extra_constaints`
+        # TODO: Add global re-assignments to `extra_constraints`
 
         func_type = CallableType(
             tuple([x[0] for x in arg_types]), rt, frozenset(extra_cols))
@@ -381,8 +390,14 @@ class WalkRulesVisitor(ast.NodeVisitor):
             return SymbolicAbstractType()
 
         if isinstance(expr, ast.Call):
-            logger.debug("Yielding a fresh symbolic type for call")
-            return SymbolicAbstractType()
+            try:
+                call_func_type = self._get_call_func_type(expr)
+            except UndefinedFunctionError:
+                logger.debug("Yielding a fresh symbolic type for "
+                             "uninterpreted function call")
+                return SymbolicAbstractType()
+            else:
+                return call_func_type.return_type
 
         if isinstance(expr, ast.Compare):
             # TODO: This isn't right. This should unify.
@@ -412,6 +427,22 @@ class WalkRulesVisitor(ast.NodeVisitor):
 
         raise NotImplementedError(
             f"Unable to judge type for expression: {expr}")
+
+    def _get_call_func_type(self, n: ast.Call) -> CallableType:
+        assert isinstance(n, ast.Call)
+
+        cached_type = getattr(n, "_infuser_call_func_type", None)
+        if cached_type is not None:
+            return cached_type
+
+        orig_func_type = self._get_expr_type(n.func)
+        if isinstance(orig_func_type, CallableType):
+            site_func_type = orig_func_type.make_monomorphic({})
+        else:
+            raise UndefinedFunctionError(f"{n.func} undefined in scope")
+
+        setattr(n, "_infuser_call_func_type", site_func_type)
+        return site_func_type
 
     def _push_scope(self, name: str) -> None:
         # Push a freshly baked, empty type environment

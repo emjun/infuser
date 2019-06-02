@@ -1,8 +1,9 @@
 from dataclasses import dataclass
 from itertools import count, chain
 import typing
-from typing import Sequence, Union, Optional, FrozenSet
+from typing import Sequence, Union, FrozenSet, MutableMapping
 
+MonomorphingCache = MutableMapping["TypeVar", "Type"]
 _fresh_typename_counter = count(0)
 
 
@@ -17,6 +18,11 @@ class TypeVar:
         if old == self:
             return new
         return self
+
+    def make_monomorphic(self, cache: MonomorphingCache) -> "Type":
+        if self not in cache:
+            cache[self] = SymbolicAbstractType()
+        return cache[self]
 
     def __hash__(self):
         return hash((self.name, id(self)))
@@ -33,6 +39,11 @@ class Type:
     def type_parameters(self) -> Sequence[Union[TypeVar, "Type"]]:
         raise NotImplementedError()
 
+    def make_monomorphic(self, cache: MonomorphingCache) -> "Type":
+        """Copy the type, replacing type variables with monotypes.
+        """
+        raise NotImplementedError()
+
     def __eq__(self, other):
         raise NotImplementedError()
 
@@ -41,13 +52,43 @@ class Type:
         raise NotImplementedError()
 
 
-# TODO: There must be a better name than `SymbolicAbtractType`
+class UnitType(Type):
+    def make_monomorphic(self, cache: MonomorphingCache) -> "Type":
+        return self
+
+    @property
+    def type_parameters(self) -> Sequence[Union[TypeVar, "Type"]]:
+        return []
+
+    def replace_type(self, old: Union["Type", TypeVar],
+                     new: Union["Type", TypeVar]) -> Union["Type", TypeVar]:
+        if isinstance(old, UnitType):
+            return new
+        return self
+
+    def __hash__(self):
+        return 9571321
+
+    def __eq__(self, other):
+        return isinstance(other, UnitType)
+
+    def __str__(self):
+        return "()"
+
+    def __repr__(self):
+        return "UnitType()"
+
+
+# TODO: There must be a better name than `SymbolicAbstractType`
 class SymbolicAbstractType(Type):
     """A simple abstract monotype."""
 
     def __init__(self):
         super().__init__()
         self.typename = "t" + str(next(_fresh_typename_counter))
+
+    def make_monomorphic(self, cache: MonomorphingCache) -> "Type":
+        return self
 
     @property
     def type_parameters(self) -> Sequence[Union[TypeVar, Type]]:
@@ -69,8 +110,8 @@ class SymbolicAbstractType(Type):
         return self.typename
 
     # Add this to print the type when debugging
-    def __repr__(self):
-        return self.typename
+    # def __repr__(self):
+    #     return self.typename
 
 
 @dataclass(eq=True, frozen=True)
@@ -81,6 +122,10 @@ class TupleType(Type):
     @property
     def type_parameters(self) -> Sequence[Union[TypeVar, "Type"]]:
         return self.element_types
+
+    def make_monomorphic(self, cache: MonomorphingCache) -> "Type":
+        return TupleType(tuple(e.make_monomorphic(cache)
+                               for e in self.element_types))
 
     def replace_type(self, old: Union[Type, TypeVar],
                      new: Union[Type, TypeVar]) -> Union[Type, TypeVar]:
@@ -100,6 +145,10 @@ class ExtraCol:
     col_names: typing.Tuple[str]
     col_type: Union[Type, TypeVar]
 
+    def make_monomorphic(self, cache: MonomorphingCache) -> "ExtraCol":
+        return ExtraCol(self.arg, self.col_names,
+                        self.col_type.make_monomorphic(cache))
+
     def __str__(self):
         return f"{self.arg}[{self.col_names}]:{self.col_type}"
 
@@ -109,7 +158,7 @@ class CallableType(Type):
     "Type for functions and other callables. The only parametric type we have."
 
     arg_types: typing.Tuple[Union[Type, TypeVar], ...]
-    return_type: Optional[Union[Type, TypeVar]]
+    return_type: Union[Type, TypeVar]
     "Either the return type of the function or `None` if void/unit."
 
     extra_cols: FrozenSet[ExtraCol]
@@ -119,13 +168,18 @@ class CallableType(Type):
     def type_parameters(self) -> Sequence[Union[TypeVar, Type]]:
         return list(chain(self.arg_types, [self.return_type]))
 
+    def make_monomorphic(self, cache: MonomorphingCache) -> "CallableType":
+        return CallableType(
+            arg_types=tuple(a.make_monomorphic(cache) for a in self.arg_types),
+            return_type=self.return_type.make_monomorphic(cache),
+            extra_cols=frozenset(a.make_monomorphic(cache)
+                                 for a in self.extra_cols))
+
     def replace_type(self, old: Union[Type, TypeVar],
                      new: Union[Type, TypeVar]) -> Union[Type, TypeVar]:
         if old == self:
             return new
-        new_rt = self.return_type
-        if new_rt is not None:
-            new_rt = new_rt.replace_type(old, new)
+        new_rt = self.return_type.replace_type(old, new)
         return CallableType(
             arg_types=tuple(a.replace_type(old, new) for a in self.arg_types),
             return_type=new_rt,

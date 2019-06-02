@@ -1,9 +1,10 @@
 import ast
-from itertools import combinations
+from itertools import combinations, combinations_with_replacement
 import logging
 import symtable
 import sys
-from typing import TypeVar
+from typing import TypeVar, Mapping, Iterable, \
+    MutableMapping, Set
 
 from infuser.cli import CLIPrinter
 from .rules import WalkRulesVisitor, STAGES
@@ -13,6 +14,16 @@ T = TypeVar("T")
 V = TypeVar("V")
 
 logger = logging.getLogger(__name__)
+
+
+def merge_set_valued_mapping(sources: Iterable[Mapping[T, Iterable[V]]]) \
+        -> Mapping[T, Set[V]]:
+    r: MutableMapping[T, Set[V]] = {}
+    for src in sources:
+        for k, v in src.items():
+            dest = r.setdefault(k, set())
+            dest.update(v)
+    return r
 
 
 def analysis_main(code_str: str, filename: str, printer: CLIPrinter) -> int:
@@ -35,23 +46,21 @@ def analysis_main(code_str: str, filename: str, printer: CLIPrinter) -> int:
     for stage in STAGES:
         subs, srcs = unify(
             visitor.type_constraints[None] | visitor.type_constraints[stage])
-        # for key in subs.keys(): 
-        #     val = subs[key]
-        #     import pdb; pdb.set_trace()    
         new_envs.append(type_env.substitute_types(subs))
         src_maps.append(srcs)
 
     for (e1, m1, s1), (e2, m2, s2) in \
             combinations(zip(new_envs, src_maps, STAGES), 2):
-        for name in set(e1.keys()) & set(e2.keys()):
-            import pdb; pdb.set_trace()
-            if e1[name] != e2[name]:
+        merged_maps = merge_set_valued_mapping([m1, m2])
+        all_shared_names = set(e1.keys()) & set(e2.keys())
+        for n1, n2 in combinations_with_replacement(all_shared_names, 2):
+            same_under_one = (e1[n1] == e1[n2])
+            same_under_two = (e2[n1] == e2[n2])
+            if same_under_one != same_under_two:
                 # TODO: Factor out the warnings I/O for easier I/O testing
-                ast1 = m1.get(e1[name], set()) | m1.get(e2[name], set())
-                ast2 = m2.get(e1[name], set()) | m2.get(e2[name], set())
-                text = f"{s1} and {s2} disagree about {name.display_str()}"
-                loc_set = set()
-                loc_set.update((x.lineno - 1, x.col_offset) for x in ast1)
-                loc_set.update((x.lineno - 1, x.col_offset) for x in ast2)
-                printer.warn(text, sorted(loc_set))
+                src_nodes = (merged_maps[e1[n1]] | merged_maps[e1[n2]] |
+                             merged_maps[e2[n1]] | merged_maps[e2[n2]])
+                printer.warn(
+                    f"Disagreement about {n1.display_str()} and {n2.display_str()}",
+                    set((x.lineno - 1, x.col_offset) for x in src_nodes))
     return 0
