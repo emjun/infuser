@@ -155,7 +155,7 @@ class PandasModuleType(Type):
         return isinstance(other, PandasModuleType)
 
     def __hash__(self):
-        return 30
+        return 30 # Why do we hard code this??
 
 
 class DataFrameClsType(Type):

@@ -24,10 +24,10 @@ cond_b = data[data['condition'] == 'b']
 "ANALYSIS"
 
 # first do some hand calculations
-print('Mean, Median, Sigma for a:')
+# print('Mean, Median, Sigma for a:')
 print(np.mean(cond_a['time']))
-print(np.median(cond_a['time']))
-print(np.sqrt(np.var(cond_a['time'])))
+# print(np.median(cond_a['time']))
+# print(np.sqrt(np.var(cond_a['time'])))
 
 # print('Mean, Median, Sigma for b:')
 # print(np.mean(cond_b['time']))

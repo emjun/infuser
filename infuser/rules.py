@@ -67,7 +67,9 @@ class WalkRulesVisitor(ast.NodeVisitor):
             if isinstance(stmt, ast.Expr) \
                     and isinstance(stmt.value, ast.Str) \
                     and stmt.value.s in STAGES:
+                # import pdb; pdb.set_trace()
                 self._current_stage = stmt.value.s
+                # import pdb; pdb.set_trace()
             self.visit(stmt)
 
     def visit_Import(self, node: ast.Import) -> None:
