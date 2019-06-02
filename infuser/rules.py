@@ -71,28 +71,26 @@ class WalkRulesVisitor(ast.NodeVisitor):
             if isinstance(stmt, ast.Expr) \
                     and isinstance(stmt.value, ast.Str) \
                     and stmt.value.s in STAGES:
-                # import pdb; pdb.set_trace()
                 self._current_stage = stmt.value.s
-                # import pdb; pdb.set_trace()
             self.visit(stmt)
 
     def visit_Import(self, node: ast.Import) -> None:
+        self.generic_visit(node)
         for a in node.names:
             if a.name == "pandas":
                 sym_name = a.name if a.asname is None else a.asname
                 pandas_sym = self._symtable_stack[-1].lookup(sym_name)
                 self._type_environment_stack[-1][
                     SymbolTypeReferant(pandas_sym)] = PandasModuleType()
-        self.generic_visit(node)
 
     def visit_ImportFrom(self, node: ast.ImportFrom) -> None:
+        self.generic_visit(node)
         if node.module == "pandas" and node.level == 0:
             for a in node.names:
                 if a.name == "DataFrame":
                     sym_name = a.name if a.asname is None else a.asname
                     sym = self._symtable_stack[-1].lookup(sym_name)
                     self._type_environment_stack[-1][sym] = DataFrameClsType()
-        self.generic_visit(node)
 
     def visit_Call(self, node: ast.Call) -> None:
         # Remember that this may be called inside `visit_Assign` etc.
@@ -186,6 +184,7 @@ class WalkRulesVisitor(ast.NodeVisitor):
         logger.debug(f"Assigned function {node.name}: {func_type}")
 
     def visit_AugAssign(self, node: ast.AugAssign) -> None:
+        self.generic_visit(node)
         if isinstance(node.op, (ast.Add, ast.Sub)):
             if isinstance(node.target, (ast.Name, ast.Subscript)):
                 tgt_type = self._get_expr_type(node.target)
@@ -200,7 +199,6 @@ class WalkRulesVisitor(ast.NodeVisitor):
                 logger.debug("Skipping augmented assignment to attribute")
         else:
             logger.debug("Ignoring AugAssign op type %s", type(node.op))
-        self.generic_visit(node)
 
     def visit_Assign(self, node: ast.Assign):
         type_env = self._type_environment_stack[-1]
