@@ -7,7 +7,6 @@ df = pd.read_csv("https://raw.githubusercontent.com/Opensourcefordatascience/Dat
 
 
 "ANALYSIS"
-
 stats.levene(df['carat'], df['price'])
 
 df['carat'].corr(df['price'])

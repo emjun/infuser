@@ -66,13 +66,6 @@ pre = intake[:, 0]
 post = intake[:, 1]
 
 
-
-
-
-
-
-
-
 "ANALYSIS"
 
 # one sample t-test
