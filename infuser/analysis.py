@@ -62,7 +62,6 @@ def analysis_main(code_str: str, filename: str, printer: CLIPrinter) -> int:
                 # TODO: Factor out the warnings I/O for easier I/O testing
                 src_nodes = (merged_maps[e1[n1]] | merged_maps[e1[n2]] |
                              merged_maps[e2[n1]] | merged_maps[e2[n2]])
-                printer.warn(
-                    f"Disagreement about {n1.display_str()} and {n2.display_str()}",
+                printer.warn(n1, n2,
                     set((x.lineno - 1, x.col_offset) for x in src_nodes))
     return 0

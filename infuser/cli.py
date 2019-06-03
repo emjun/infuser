@@ -22,7 +22,8 @@ class CLIPrinter:
         self.print_json = print_json
         self.warnings_printed = 0
 
-    def warn(self, text: str, locations: Sequence[Tuple[int, int]]) -> None:
+    def warn(self, n1, n2, locations: Sequence[Tuple[int, int]]) -> None:
+        text = f"Disagreement about {n1.display_str()} and {n2.display_str()}"
         if self.print_json:
             pkg = {"warning": text,
                    "locations": [{"line": l[0], "offset": l[1]}
@@ -32,11 +33,13 @@ class CLIPrinter:
         else:
             if self.warnings_printed > 0:
                 print()
+            print(f"{text}. Interactions found at:")
+            print()
             for line_no, char_offset in locations:
                 line = self.src_code.splitlines()[line_no]
-                print(line)
-                print((" " * char_offset) + "^")
-            print((" " * min(2, char_offset)) + text)
+                print("  " + line.lstrip())
+                chars_removed = len(line) - len(line.lstrip())
+                print((" " * (2 + char_offset - chars_removed)) + "^")
         self.warnings_printed += 1
 
     def summarize(self):
