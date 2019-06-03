@@ -17,7 +17,6 @@ data = pd.read_csv(file_path)
 print(data)
 
 "ANALYSIS"
-
 subjects = ['tax', 'tictactoe', 'triangle']
 approaches = ['forking'] #, 'caching', 'forking']
 
@@ -25,7 +24,7 @@ approaches = ['forking'] #, 'caching', 'forking']
 for a in approaches: # for a single strategy    
     for s in subjects: # cover all subjects
         for run in range(1,6): # over all different runs
-            import pdb; pdb.set_trace()
+            # import pdb; pdb.set_trace()
             r = data[(data['run'] == run) & (data['subject'] == s)]
             print(a + ' ' + s + ' ' + str(run) + ' ' + str(np.mean(r[a])))
             

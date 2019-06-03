@@ -3,7 +3,7 @@ import numpy as np
 from scipy import stats
 
 
-# WRANGLING
+"WRANGLING"
 
 ## Define 2 random distributions
 #Sample Size
@@ -16,7 +16,7 @@ b = np.random.randn(N)
 
 
 
-# ANALYSIS
+"ANALYSIS"
 
 
 ## Calculate the Standard Deviation

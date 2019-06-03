@@ -2,11 +2,11 @@
 import pandas as pd
 from scipy import stats
 
-# WRANGLING
+"WRANGLING"
 df = pd.read_csv("https://raw.githubusercontent.com/Opensourcefordatascience/Data-sets/master/diamonds.csv")
 
 
-# ANALYSIS
+"ANALYSIS"
 
 stats.levene(df['carat'], df['price'])
 

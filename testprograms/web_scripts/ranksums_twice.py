@@ -1,7 +1,7 @@
 import pandas as pd
 from scipy import stats
 
-# WRANGLING
+"WRANGLING"
 
 # must specify that blank space " " is NaN
 experimentDF = pd.read_csv("../data/parasite_data.csv", na_values=[" "])
@@ -31,7 +31,7 @@ print ("Data set 3:\n", treatment3)
 print ("Data set 4:\n", treatment4)
 
 
-# ANALYSIS
+"ANALYSIS"
 
 # A RankSum test will provide a P value indicating whether or not the two
 # distributions are the same.

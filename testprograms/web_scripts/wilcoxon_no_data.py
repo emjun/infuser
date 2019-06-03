@@ -3,7 +3,7 @@ from numpy.random import seed
 from numpy.random import randn
 from scipy.stats import wilcoxon
 
-# WRANGLING
+"WRANGLING" 
 
 # seed the random number generator
 seed(1)
@@ -14,7 +14,7 @@ data2 = 5 * randn(100) + 51
 
 
 
-# ANALYSIS
+"ANALYSIS"
 
 
 # compare samples

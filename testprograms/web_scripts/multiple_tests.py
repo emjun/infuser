@@ -8,7 +8,7 @@ import numpy as np
 from scipy.stats import ttest_1samp, wilcoxon, ttest_ind, mannwhitneyu
 
 
-# WRANGLING
+"WRANGLING"
 
 
 # daily intake of energy in kJ for 11 women
@@ -73,7 +73,7 @@ post = intake[:, 1]
 
 
 
-# ANALYSIS
+"ANALYSIS"
 
 # one sample t-test
 # null hypothesis: expected value = 7725

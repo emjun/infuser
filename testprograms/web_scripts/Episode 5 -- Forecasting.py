@@ -3,13 +3,13 @@ import matplotlib as mpl
 from matplotlib import pyplot as plt
 from scipy import stats
 
-# WRANGLING
+"WRANGLING"
 # Request rates to nodes in a cluster
 X = np.loadtxt("../data/forecasting.csv", delimiter=',', usecols=(0,1,2,3,4,5))[:1000]
 T, A, B, C, D, E = X.T
 
 
-# ANALYSIS
+"ANALYSIS"
 
 b, a, r_value, p_value, std_err = stats.linregress(A,B)
 

@@ -49,6 +49,7 @@ def analysis_main(code_str: str, filename: str, printer: CLIPrinter) -> int:
         new_envs.append(type_env.substitute_types(subs))
         src_maps.append(srcs)
 
+    # import pdb; pdb.set_trace()
     for (e1, m1, s1), (e2, m2, s2) in \
             combinations(zip(new_envs, src_maps, STAGES), 2):
         merged_maps = merge_set_valued_mapping([m1, m2])
@@ -58,7 +59,7 @@ def analysis_main(code_str: str, filename: str, printer: CLIPrinter) -> int:
             same_under_two = (e2[n1] == e2[n2])
 
             if same_under_one != same_under_two:
-                import pdb; pdb.set_trace()
+                # import pdb; pdb.set_trace()
                 # TODO: Factor out the warnings I/O for easier I/O testing
                 src_nodes = (merged_maps[e1[n1]] | merged_maps[e1[n2]] |
                              merged_maps[e2[n1]] | merged_maps[e2[n2]])

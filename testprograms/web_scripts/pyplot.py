@@ -2,13 +2,13 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.stats import linregress
 
-# WRANGLING
+"WRANGLING"
 dataframe = pd.read_csv("../data/scottish_hills.csv")
 
 x = dataframe.Height
 y = dataframe.Latitude
 
-# ANALYSIS
+"ANALYSIS"
 stats = linregress(x, y)
 
 m = stats.slope
