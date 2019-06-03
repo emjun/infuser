@@ -5,11 +5,15 @@ Created on Tue May  7 16:25:46 2019
 @author: Lukas Blass
 """
 
+import os
 import numpy as np
 import pandas as pd
 
 "WRANGLING"
-data = pd.read_csv('data/timing.csv')
+base_path = '/Users/emjun/Git/infuser/testprograms/data'
+file_name = 'data_0.csv'
+file_path = os.path.join(base_path, file_name)
+data = pd.read_csv(file_path)
 print(data)
 
 "ANALYSIS"
@@ -21,7 +25,7 @@ approaches = ['forking'] #, 'caching', 'forking']
 for a in approaches: # for a single strategy    
     for s in subjects: # cover all subjects
         for run in range(1,6): # over all different runs
-            
+            import pdb; pdb.set_trace()
             r = data[(data['run'] == run) & (data['subject'] == s)]
             print(a + ' ' + s + ' ' + str(run) + ' ' + str(np.mean(r[a])))
             

@@ -56,7 +56,9 @@ def analysis_main(code_str: str, filename: str, printer: CLIPrinter) -> int:
         for n1, n2 in combinations_with_replacement(all_shared_names, 2):
             same_under_one = (e1[n1] == e1[n2])
             same_under_two = (e2[n1] == e2[n2])
+
             if same_under_one != same_under_two:
+                import pdb; pdb.set_trace()
                 # TODO: Factor out the warnings I/O for easier I/O testing
                 src_nodes = (merged_maps[e1[n1]] | merged_maps[e1[n2]] |
                              merged_maps[e2[n1]] | merged_maps[e2[n2]])
