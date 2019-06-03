@@ -57,6 +57,7 @@ class WalkRulesVisitor(ast.NodeVisitor):
     def __init__(self, sym_table: symtable.SymbolTable):
         super().__init__()
         self.type_constraints = defaultdict(set)
+        self.stages_seen = set([None])
         self._type_environment_stack = [TypingEnvironment()]
         self._symtable_stack: List[symtable.SymbolTable] = [sym_table]
         self._return_types = []
@@ -72,6 +73,7 @@ class WalkRulesVisitor(ast.NodeVisitor):
                     and isinstance(stmt.value, ast.Str) \
                     and stmt.value.s in STAGES:
                 self._current_stage = stmt.value.s
+                self.stages_seen.add(self._current_stage)
             self.visit(stmt)
 
     def visit_Import(self, node: ast.Import) -> None:
@@ -98,12 +100,18 @@ class WalkRulesVisitor(ast.NodeVisitor):
         # TODO: Add special handling for recursion, which makes side effects
         #  tricky to analyze
 
+        # Ignore `print` calls. Don't visit subnodes at all.
+        if isinstance(node.func, ast.Name) and node.func.id == "print":
+            return
+
+        # Recurse.
         self.generic_visit(node)
 
+        # Not calling something named? Bail after visiting subnodes.
         if not isinstance(node.func, ast.Name):
             return
 
-        # Don't analyze calls to builtins
+        # By default, don't analyze calls to builtins
         func_id = node.func.id
         if func_id in dir(builtins) and callable(getattr(builtins, func_id)):
             return
@@ -303,6 +311,7 @@ class WalkRulesVisitor(ast.NodeVisitor):
 
     def visit_BinOp(self, node: ast.BinOp) -> None:
         self.generic_visit(node)
+
         if isinstance(node.op, (ast.Add, ast.Sub)):
             etype = self._get_expr_type(node, bake_fresh=True)
             for x in [node.left, node.right]:

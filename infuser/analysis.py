@@ -33,7 +33,7 @@ def analysis_main(code_str: str, filename: str, printer: CLIPrinter) -> int:
     visitor.visit(client_ast)
 
     # Complain if no stages were found
-    if sum(1 for k in visitor.type_constraints if k is not None) == 0:
+    if len(visitor.stages_seen) == 0:
         print("No top-level stages found. (Note that Infuser doesn't support "
               "stage headings inside `if __name__ == '__main__'` blocks.)",
               file=sys.stderr)
