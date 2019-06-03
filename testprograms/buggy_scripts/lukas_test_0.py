@@ -18,34 +18,33 @@ file_name = 'data_0.csv'
 file_path = os.path.join(base_path, file_name)
 data = pd.read_csv(file_path)
 '''
-data = pd.read_csv('data/data_0.csv')
+data = pd.read_csv('../data/data_0.csv')
 
 #import pdb; pdb.set_trace()
 
 cond_a = data[data['condition'] == 'a']
 cond_b = data[data['condition'] == 'b']
 
+# convert time for condition a to minutes
+cond_a_time = cond_a['time']
+cond_a_time = cond_a_time / 60
+
 "ANALYSIS"
 
-# first do some hand calculations
-print('Mean, Median, Sigma for a:')
-print(np.mean(cond_a['time']))
-print(np.median(cond_a['time']))
-print(np.sqrt(np.var(cond_a['time'])))
 
-print('Mean, Median, Sigma for b:')
-print(np.mean(cond_b['time']))
-print(np.median(cond_b['time']))
-print(np.sqrt(np.var(cond_b['time'])))
 
-# then let the t-test decide
+# let the t-test decide
 
-stat, p_val = stats.ttest_ind(cond_a['time'], cond_b['time'])
+# this should not be accepted because we compare different units
+stat, p_val = stats.ttest_ind(cond_a_time, cond_b['time'])
+
 print('p_val time: ' + str(p_val))
 if p_val < 0.1:
     print('unequal means for time')
 else:
     print('equal means for time')
+
+
 
 
 print('=========================')
@@ -62,9 +61,7 @@ print(np.median(cond_b['accuracy']))
 print(np.sqrt(np.var(cond_b['accuracy'])))
 
 
-b = abs(np.sqrt(np.var(cond_a['accuracy'])) - np.sqrt(np.var(cond_b['accuracy']))) < 10
-
-stat, p_val = stats.ttest_ind(cond_a['accuracy'], cond_b['accuracy'], equal_var=True)
+stat, p_val = stats.ttest_ind(cond_a['accuracy'], cond_b['accuracy'])
 print('p_val = ' + str(p_val))
 
 if p_val < 0.1:
