@@ -1,3 +1,7 @@
+'''
+buggy lines: 47
+'''
+
 import pandas as pd
 from scipy import stats
 
@@ -9,7 +13,8 @@ def age_to_categories(df):
     return df
 
 
-# WRANGLING
+"WRANGLING"
+
 df = pd.read_csv("../data/blood_pressure.csv")
 
 df[['bp_before','bp_after']].describe()
@@ -28,7 +33,8 @@ men_age = men['agegrp']
 women_age = women['agegrp']
 
 
-# ANALYSIS
+"ANALYSIS"
+
 # the first three should work
 stats.wilcoxon(df['bp_difference'])
 

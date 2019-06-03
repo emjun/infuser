@@ -1,10 +1,13 @@
+'''
+buggy lines: 29
+'''
 import os 
 import numpy as np
 import pandas as pd
 from scipy import stats
 
 
-# WRANGLING
+"WRANGLING"
 
 df = pd.read_csv('../data/cars.csv')
 
@@ -16,7 +19,7 @@ actual_price_2019 = df['2019_Price'] - df['2019_PriceDiscount'] * df['2019_Price
 
 print(actual_price_2019)
 
-# ANALYSIS
+"ANALYSIS"
 
 # these two should work out
 stats.mannwhitneyu(df['2010_Price'], df['2019_Price'])

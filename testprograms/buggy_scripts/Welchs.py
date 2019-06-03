@@ -1,7 +1,11 @@
+'''
+buggy lines: 32, 55
+'''
+
 import pandas as pd
 from scipy import stats	
 
-# WRANGLING
+"WRANGLING"
 
 df = pd.read_excel("../data/iris_data.xlsx")
 print(df)
@@ -13,7 +17,7 @@ virginica = df[(df['species'] == 'Iris-virginica')]
 
 
 
-# ANALYSIS
+"ANALYSIS"
 
 sh1 = stats.shapiro(setosa['petal_length'])
 print(sh1)
