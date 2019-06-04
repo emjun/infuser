@@ -194,7 +194,7 @@ class CallableType(Type):
         return b
 
 
-class PandasModuleType(Type):
+class SingletonType(Type):
     @property
     def type_parameters(self) -> Sequence[Union[TypeVar, Type]]:
         return []
@@ -206,10 +206,30 @@ class PandasModuleType(Type):
         return self
 
     def __eq__(self, other):
-        return isinstance(other, PandasModuleType)
+        return type(self) == type(other)
 
     def __hash__(self):
-        return 30 # Why do we hard code this??
+        return hash(str(type(self)))
+
+
+class PandasModuleType(SingletonType):
+    pass
+
+
+class ScipyModuleType(SingletonType):
+    pass
+
+
+class StatsmodelsModuleType(SingletonType):
+    pass
+
+
+class ScipyStatsModuleType(SingletonType):
+    pass
+
+
+class MannWhitneyUFunc(SingletonType):
+    pass
 
 
 class DataFrameClsType(Type):
@@ -227,4 +247,4 @@ class DataFrameClsType(Type):
         return isinstance(other, DataFrameClsType)
 
     def __hash__(self):
-        return 30
+        return 31

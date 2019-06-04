@@ -7,12 +7,23 @@ from typing import List, Optional, Tuple, Mapping, Set
 
 from .abstracttypes import Type, SymbolicAbstractType, PandasModuleType, \
     DataFrameClsType, CallableType, TypeVar, ExtraCol, TupleType, \
-    TupleType as tTuple, UnitType
+    TupleType as tTuple, UnitType, StatsmodelsModuleType, ScipyModuleType, \
+    ScipyStatsModuleType, MannWhitneyUFunc
 from .typeenv import TypingEnvironment, SymbolTypeReferant, ColumnTypeReferant
 
 logger = logging.getLogger(__name__)
 
 STAGES = frozenset(["ANALYSIS", "WRANGLING"])
+MODULE_TYPES = {
+    "pandas": PandasModuleType,
+    "scipy": ScipyModuleType,
+    "scipy.stats": ScipyStatsModuleType,
+    "statsmodels": StatsmodelsModuleType,
+}
+MODULE_TO_METHOD = {
+    (PandasModuleType, "DataFrame"): DataFrameClsType,
+    (ScipyStatsModuleType, "mannwhitneyu"): MannWhitneyUFunc,
+}
 
 
 class InfuserSyntaxError(Exception):
@@ -78,20 +89,27 @@ class WalkRulesVisitor(ast.NodeVisitor):
     def visit_Import(self, node: ast.Import) -> None:
         self.generic_visit(node)
         for a in node.names:
-            if a.name == "pandas":
+            try:
+                mod_type = MODULE_TYPES[a.name]
+            except KeyError:
+                pass
+            else:
                 sym_name = a.name if a.asname is None else a.asname
-                pandas_sym = self._symtable_stack[-1].lookup(sym_name)
-                self._type_environment_stack[-1][
-                    SymbolTypeReferant(pandas_sym)] = PandasModuleType()
+                mod_sym = self._symtable_stack[-1].lookup(sym_name)
+                self._type_environment_stack[-1][SymbolTypeReferant(mod_sym)] \
+                    = mod_type()
 
     def visit_ImportFrom(self, node: ast.ImportFrom) -> None:
         self.generic_visit(node)
-        if node.module == "pandas" and node.level == 0:
+        if node.level == 0:
             for a in node.names:
-                if a.name == "DataFrame":
+                key = (MODULE_TYPES.get(node.module), a.name)
+                if key in MODULE_TO_METHOD:
+                    constructor = MODULE_TO_METHOD[key]
                     sym_name = a.name if a.asname is None else a.asname
                     sym = self._symtable_stack[-1].lookup(sym_name)
-                    self._type_environment_stack[-1][sym] = DataFrameClsType()
+                    self._type_environment_stack[-1][SymbolTypeReferant(sym)] \
+                        = constructor()
 
     def visit_Call(self, node: ast.Call) -> None:
         # Remember that this may be called inside `visit_Assign` etc.
@@ -379,6 +397,9 @@ class WalkRulesVisitor(ast.NodeVisitor):
             if isinstance(value_type, PandasModuleType):
                 if expr.attr == "DataFrame":
                     return DataFrameClsType()
+            elif isinstance(value_type, ScipyModuleType):
+                if expr.attr == "stats":
+                    pass
             logger.debug("Returning fresh abstract type for attribute")
             return SymbolicAbstractType()
 
@@ -465,7 +486,11 @@ class WalkRulesVisitor(ast.NodeVisitor):
 
     def _builtin_func_type(self, node: ast.Call) -> Optional[CallableType]:
         """Return a monomorphic type for a function being applied at `node`."""
-        if isinstance(node.func, ast.Name):
+        func_expr_type = self._get_expr_type(node.func)
+        if isinstance(func_expr_type, MannWhitneyUFunc):
+            t = SymbolicAbstractType()
+            return CallableType((t, t), t, frozenset())
+        elif isinstance(node.func, ast.Name):
             func_id = node.func.id
             if func_id == "max" or func_id == "min":
                 rt = SymbolicAbstractType()
@@ -485,6 +510,7 @@ class WalkRulesVisitor(ast.NodeVisitor):
         elif isinstance(node.func, ast.Attribute):
             left = self._get_expr_type(node.func.value)
             right: str = node.func.attr
+            # TODO: Type the concat function like we did with `mannwhitneyu`
             if isinstance(left, PandasModuleType) and right == "concat":
                 if len(node.args) == 1 and isinstance(node.args[0], ast.Tuple):
                     rt = SymbolicAbstractType()
@@ -494,7 +520,6 @@ class WalkRulesVisitor(ast.NodeVisitor):
                     logger.warning("We don't yet support non-tuple arguments "
                                    "to `pd.concat`")
                     return None
-            # TODO: Add the DataFrame member variant
 
     def _push_scope(self, name: str) -> None:
         # Push a freshly baked, empty type environment
