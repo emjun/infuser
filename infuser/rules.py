@@ -487,8 +487,9 @@ class WalkRulesVisitor(ast.NodeVisitor):
 
     def _builtin_func_type(self, node: ast.Call) -> Optional[CallableType]:
         """Return a monomorphic type for a function being applied at `node`."""
+        # TODO: Eliminate special-casing for every import style of `scipy.stats`
         func_expr_type = self._get_expr_type(node.func)
-        if isinstance(func_expr_type, MannWhitneyUFunc):
+        if isinstance(func_expr_type, MannWhitneyUFunc) or (isinstance(node.func, ast.Attribute) and isinstance(self._get_expr_type(node.func.value), ScipyStatsModuleType) and node.func.attr == "mannwhitneyu"):
             t = SymbolicAbstractType()
             return CallableType((t, t), t, frozenset())
         elif isinstance(node.func, ast.Name):
