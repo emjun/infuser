@@ -4,7 +4,8 @@ import symtable
 from typing import Iterable
 import unittest
 
-from infuser.abstracttypes import TypeVar, Type, PandasModuleType
+from infuser.abstracttypes import TypeVar, Type, PandasModuleType, \
+    ScipyStatsModuleType
 from infuser.rules import WalkRulesVisitor, TypeEqConstraint
 from infuser.typeenv import ColumnTypeReferant, \
     SymbolTypeReferant
@@ -298,6 +299,14 @@ dupe_col(mapping1); dupe_col(mapping2)"""]
                                              stage="WRANGLING"))
 
         self.assertEqual(0, len(visitor.type_constraints[None]))
+
+    def test_import_stats_from_scipy(self):
+        code_str = "from scipy import stats; import scipy"
+        root_node = ast.parse(code_str, '<unknown>', 'exec')
+        table = symtable.symtable(code_str, '<unknown>', 'exec')
+        visitor = WalkRulesVisitor(table)
+        visitor.visit(root_node)
+        self.assertIsInstance(visitor.type_environment.get(SymbolTypeReferant(table.lookup("stats"))), ScipyStatsModuleType)
 
     @staticmethod
     def types_connected(a, b, visitor: WalkRulesVisitor, stage=None) -> bool:

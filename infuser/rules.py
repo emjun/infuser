@@ -22,6 +22,7 @@ MODULE_TYPES = {
 }
 MODULE_TO_METHOD = {
     (PandasModuleType, "DataFrame"): DataFrameClsType,
+    (ScipyModuleType, "stats"): ScipyStatsModuleType,
     (ScipyStatsModuleType, "mannwhitneyu"): MannWhitneyUFunc,
 }
 
