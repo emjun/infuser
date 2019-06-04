@@ -157,7 +157,7 @@ class ExtraCol:
 class CallableType(Type):
     "Type for functions and other callables. The only parametric type we have."
 
-    arg_types: typing.Tuple[Union[Type, TypeVar], ...]
+    param_types: typing.Tuple[Union[Type, TypeVar], ...]
     return_type: Union[Type, TypeVar]
     "Either the return type of the function or `None` if void/unit."
 
@@ -166,11 +166,11 @@ class CallableType(Type):
 
     @property
     def type_parameters(self) -> Sequence[Union[TypeVar, Type]]:
-        return list(chain(self.arg_types, [self.return_type]))
+        return list(chain(self.param_types, [self.return_type]))
 
     def make_monomorphic(self, cache: MonomorphingCache) -> "CallableType":
         return CallableType(
-            arg_types=tuple(a.make_monomorphic(cache) for a in self.arg_types),
+            param_types=tuple(a.make_monomorphic(cache) for a in self.param_types),
             return_type=self.return_type.make_monomorphic(cache),
             extra_cols=frozenset(a.make_monomorphic(cache)
                                  for a in self.extra_cols))
@@ -181,12 +181,12 @@ class CallableType(Type):
             return new
         new_rt = self.return_type.replace_type(old, new)
         return CallableType(
-            arg_types=tuple(a.replace_type(old, new) for a in self.arg_types),
+            param_types=tuple(a.replace_type(old, new) for a in self.param_types),
             return_type=new_rt,
             extra_cols=self.extra_cols)
 
     def __str__(self):
-        a = ", ".join(str(x) for x in self.arg_types)
+        a = ", ".join(str(x) for x in self.param_types)
         b = f"({a}) → {self.return_type}"
         if len(self.extra_cols):
             e = ", ".join(str(c) for c in self.extra_cols)

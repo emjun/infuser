@@ -1,5 +1,4 @@
 import ast
-import builtins
 from collections import defaultdict
 from dataclasses import dataclass
 import logging
@@ -108,20 +107,18 @@ class WalkRulesVisitor(ast.NodeVisitor):
         self.generic_visit(node)
 
         # Not calling something named? Bail after visiting subnodes.
-        if not isinstance(node.func, ast.Name):
-            return
-
-        # By default, don't analyze calls to builtins
-        func_id = node.func.id
-        if func_id in dir(builtins) and callable(getattr(builtins, func_id)):
-            return
+        # if not isinstance(node.func, ast.Name):
+        #     return
 
         # Look up the function type *specialized to this call site*
         try:
             func_type = self._get_call_func_type(node)
         except UndefinedFunctionError:
-            logger.debug(f"Treating {func_id} as uninterpreted function")
+            logger.debug(f"Treating {node.func} as uninterpreted function")
         else:
+            for arg_node, param_type in zip(node.args, func_type.param_types):
+                arg = self._get_expr_type(arg_node)
+                self._push_constraint(TypeEqConstraint(param_type, arg, node))
             for extra_col in func_type.extra_cols:
                 if isinstance(extra_col.arg, int):
                     node_arg = node.args[extra_col.arg]
@@ -230,24 +227,33 @@ class WalkRulesVisitor(ast.NodeVisitor):
             possible_data_asts += [k for k in call.keywords if k.arg == "data"]
             if len(possible_data_asts) >= 2:
                 raise Exception("DataFrame given `data` twice")
-            elif len(possible_data_asts) >= 1:
-                data_ast = possible_data_asts[0].value
-                if not isinstance(data_ast, ast.Dict):
-                    raise NotImplementedError("Non-dict `data` unsupported")
-                for k, v in zip(data_ast.keys, data_ast.values):
-                    # Assign a subscript-extended reference to a fresh type for
-                    # every target and `data` key literal
-                    if k is None:
-                        raise NotImplementedError("dict `**` unsupported")
-                    for t in node.targets:
-                        if isinstance(t, ast.Name):
+            else:
+                # Add name for DataFrame itself
+                for t in node.targets:
+                    if isinstance(t, ast.Name):
+                        t_sym_ref = SymbolTypeReferant(
+                            self._symtable_stack[-1].lookup(t.id))
+                        type_env[t_sym_ref] = SymbolicAbstractType()
+                    else:
+                        raise NotImplementedError(
+                            "Only name targets are implemented")
+
+                # Add names for all subscripts
+                if len(possible_data_asts):
+                    data_ast = possible_data_asts[0].value
+                    if not isinstance(data_ast, ast.Dict):
+                        raise NotImplementedError("Non-dict data unsupported")
+                    for k, v in zip(data_ast.keys, data_ast.values):
+                        # Assign a subscript-extended reference to a fresh type
+                        # for every target and `data` key literal
+                        if k is None:
+                            raise NotImplementedError("dict `**` unsupported")
+                        for t in node.targets:
+                            assert isinstance(t, ast.Name)
                             t_sym_ref = SymbolTypeReferant(
                                 self._symtable_stack[-1].lookup(t.id))
                             type_env[t_sym_ref.add_subscript(k.s)] = \
                                 SymbolicAbstractType()
-                        else:
-                            raise NotImplementedError(
-                                "Only name targets are implemented")
         else:
             value_type = self._get_expr_type(node.value, bake_fresh=True)
 
@@ -442,14 +448,53 @@ class WalkRulesVisitor(ast.NodeVisitor):
         if cached_type is not None:
             return cached_type
 
+        # TODO: Might not handle shadowing of builtin func. names correctly.
+        builtin_func_type = self._builtin_func_type(n)
         orig_func_type = self._get_expr_type(n.func)
-        if isinstance(orig_func_type, CallableType):
+        if builtin_func_type is not None:
+            site_func_type = builtin_func_type.make_monomorphic({})
+            assert builtin_func_type == site_func_type, \
+                "builtin_func_type contained a type variable"
+        elif isinstance(orig_func_type, CallableType):
             site_func_type = orig_func_type.make_monomorphic({})
         else:
             raise UndefinedFunctionError(f"{n.func} undefined in scope")
 
         setattr(n, "_infuser_call_func_type", site_func_type)
         return site_func_type
+
+    def _builtin_func_type(self, node: ast.Call) -> Optional[CallableType]:
+        """Return a monomorphic type for a function being applied at `node`."""
+        if isinstance(node.func, ast.Name):
+            func_id = node.func.id
+            if func_id == "max" or func_id == "min":
+                rt = SymbolicAbstractType()
+                if len(node.args) == 1 and isinstance(node.args[0], ast.Tuple):
+                    # max/min(iterable, *[, key, default])
+                    args = (TupleType(tuple([rt] * len(node.args[0].elts))),)
+                    return CallableType(args, rt, frozenset())
+                elif len(node.args) > 1:
+                    # max/min(arg1, arg2, *args[, key])
+                    args = tuple([rt] * len(node.args))
+                    return CallableType(args, rt, frozenset())
+                else:
+                    return None
+            elif func_id in ["reversed", "sorted", "list", "tuple"]:
+                tv = SymbolicAbstractType()
+                return CallableType((tv,), tv, frozenset())
+        elif isinstance(node.func, ast.Attribute):
+            left = self._get_expr_type(node.func.value)
+            right: str = node.func.attr
+            if isinstance(left, PandasModuleType) and right == "concat":
+                if len(node.args) == 1 and isinstance(node.args[0], ast.Tuple):
+                    rt = SymbolicAbstractType()
+                    args = (TupleType(tuple([rt] * len(node.args[0].elts))),)
+                    return CallableType(args, rt, frozenset())
+                else:
+                    logger.warning("We don't yet support non-tuple arguments "
+                                   "to `pd.concat`")
+                    return None
+            # TODO: Add the DataFrame member variant
 
     def _push_scope(self, name: str) -> None:
         # Push a freshly baked, empty type environment

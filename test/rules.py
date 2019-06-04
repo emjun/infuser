@@ -4,7 +4,7 @@ import symtable
 from typing import Iterable
 import unittest
 
-from infuser.abstracttypes import TypeVar, Type
+from infuser.abstracttypes import TypeVar, Type, PandasModuleType
 from infuser.rules import WalkRulesVisitor, TypeEqConstraint
 from infuser.typeenv import ColumnTypeReferant, \
     SymbolTypeReferant
@@ -61,6 +61,24 @@ class TestRules(unittest.TestCase):
 
             self.assertEqual(expected_type_cnt, len(visitor.type_environment))
             for a, b in combinations(visitor.type_environment.values(), 2):
+                self.assertTrue(self.types_connected(a, b, visitor))
+
+    def test_max_min_and_concat_merge(self):
+        FUNCS = ["max", "min"]
+        examples = [(2, f"x = 1; y = 2; {f}(x, y)") for f in FUNCS]
+        examples += [(3, "import pandas as pd; x = pd.DataFrame(); "
+                         "y = pd.DataFrame(); pd.concat((x, y))")]
+
+        for expected_type_cnt, code_str in examples:
+            root_node = ast.parse(code_str, '<unknown>', 'exec')
+            table = symtable.symtable(code_str, '<unknown>', 'exec')
+            visitor = WalkRulesVisitor(table)
+            visitor.visit(root_node)
+
+            self.assertEqual(expected_type_cnt, len(visitor.type_environment))
+            for a, b in combinations(visitor.type_environment.values(), 2):
+                if any(isinstance(x, PandasModuleType) for x in (a, b)):
+                    continue
                 self.assertTrue(self.types_connected(a, b, visitor))
 
     def test_constraints_on_unassigned_references(self):

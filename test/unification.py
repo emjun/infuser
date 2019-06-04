@@ -28,9 +28,9 @@ class TestUnification(unittest.TestCase):
 
     def test_unify_with_parameterized_types(self):
         a, b, c = [SymbolicAbstractType() for _ in range(3)]
-        c1 = CallableType(arg_types=(a, b), return_type=UnitType(),
+        c1 = CallableType(param_types=(a, b), return_type=UnitType(),
                           extra_cols=frozenset())
-        c2 = CallableType(arg_types=(a, c), return_type=UnitType(),
+        c2 = CallableType(param_types=(a, c), return_type=UnitType(),
                           extra_cols=frozenset())
         substitutions = unify_simple([TypeEqConstraint(c1, c2, src_node=None)])
         self.assertTrue((substitutions == {c: b}) or (substitutions == {b: c}))
