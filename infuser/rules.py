@@ -3,7 +3,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 import logging
 import symtable
-from typing import List, Optional, Tuple, Mapping, Set
+from typing import List, Optional, Tuple, Mapping, Set, Union
 
 from .abstracttypes import Type, SymbolicAbstractType, PandasModuleType, \
     DataFrameClsType, CallableType, TypeVar, ExtraCol, TupleType, \
@@ -49,6 +49,12 @@ class TypeEqConstraint:
     left: Type
     right: Type
     src_node: Optional[ast.AST] = None
+
+    def replace_type(self, old: Union[Type, TypeVar],
+                     new: Union[Type, TypeVar]) -> "TypeEqConstraint":
+        return TypeEqConstraint(self.left.replace_type(old, new),
+                                self.right.replace_type(old, new),
+                                src_node=self.src_node)
 
 
 class WalkRulesVisitor(ast.NodeVisitor):
@@ -509,13 +515,14 @@ class WalkRulesVisitor(ast.NodeVisitor):
         builtin_func_type = self._builtin_func_type(n)
         orig_func_type = self._get_expr_type(n.func)
         if builtin_func_type is not None:
-            site_func_type = builtin_func_type.make_monomorphic({})
+            site_func_type, subs = builtin_func_type.make_monomorphic({})
             assert builtin_func_type == site_func_type, \
                 "builtin_func_type contained a type variable"
         elif isinstance(orig_func_type, CallableType):
-            site_func_type = orig_func_type.make_monomorphic({})
+            site_func_type, subs = orig_func_type.make_monomorphic({})
         else:
             raise UndefinedFunctionError(f"{n.func} undefined in scope")
+        self._duplicate_constraints_for_substitutions(subs)
 
         setattr(n, "_infuser_call_func_type", site_func_type)
         return site_func_type
@@ -580,6 +587,16 @@ class WalkRulesVisitor(ast.NodeVisitor):
         # Only record when we're at the module level
         if len(self._type_environment_stack) == 1:
             self.referants_made[self._current_stage].add(ref)
+
+    def _duplicate_constraints_for_substitutions(
+            self, subs: Mapping[Union[Type, TypeVar], Type]) -> None:
+        new_constraints: Set[TypeEqConstraint] = set()
+        for c in self.type_constraints[self._current_stage]:
+            c = c
+            for k, v in subs.items():
+                c = c.replace_type(k , v)
+            new_constraints.add(c)
+        self.type_constraints[self._current_stage].update(new_constraints)
 
 
 def accum_string_subscripts(expr: ast.Subscript) \

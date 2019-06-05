@@ -182,7 +182,7 @@ d["Price2"] = d["Price"]"""]
             visitor.visit(root_node)
 
             # Make sure that `d["Price"]` and `d["Price2"]` are equal
-            self.assertFalse(self.types_connected(p1_expr, p2_expr, visitor))
+            self.assertTrue(self.types_connected(p1_expr, p2_expr, visitor))
 
     def test_walk_rules_over_simple_assignment_examples_with_funcs(self):
         # Equivalent examples
@@ -289,16 +289,16 @@ dupe_col(mapping1); dupe_col(mapping2)"""]
         visitor = WalkRulesVisitor(table)
         visitor.visit(root_node)
 
-        self.assertEqual({"WRANGLING"}, set(visitor.type_constraints))
+        self.assertEqual({None, "WRANGLING"}, set(visitor.type_constraints))
         wrang_cs = visitor.type_constraints["WRANGLING"]
-        self.assertEqual(2, len(wrang_cs))
+        self.assertEqual(3, len(wrang_cs))
 
         x_sr, y_sr = [SymbolTypeReferant(table.lookup(n)) for n in "xy"]
         x_t, y_t = [visitor.type_environment[sr] for sr in (x_sr, y_sr)]
         self.assertTrue(self.types_connected(x_t, y_t, visitor,
                                              stage="WRANGLING"))
 
-        self.assertEqual(0, len(visitor.type_constraints[None]))
+        self.assertEqual(2, len(visitor.type_constraints[None]))
 
     def test_import_stats_from_scipy(self):
         code_str = "from scipy import stats; import scipy"

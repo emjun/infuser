@@ -64,11 +64,12 @@ class TypingEnvironment(dict,
 
     def get_or_bake(self, k: TypeReferant) -> Union[Type, TypeVar]:
         """Return the assigned type for `k` or a fresh type or type variable."""
-        if isinstance(k, ColumnTypeReferant) and isinstance(
-                self.get(k.symbol, None), TypeVar):
-            self[k] = TypeVar()
-        elif k not in self:
-            self[k] = SymbolicAbstractType()
+        if k not in self:
+            if isinstance(k, ColumnTypeReferant) \
+                    and isinstance(self.get(k.symbol, None), TypeVar):
+                self[k] = TypeVar()
+            else:
+                self[k] = SymbolicAbstractType()
         return self[k]
 
     def remove_assignments(self, sym: SymbolTypeReferant) -> None:

@@ -1,16 +1,35 @@
 from dataclasses import dataclass
 from itertools import count, chain
-import typing
-from typing import Sequence, Union, FrozenSet, MutableMapping
+from typing import Sequence, Union, FrozenSet, MutableMapping, Mapping, Tuple, \
+    TypeVar, Iterable, List
+
+T = TypeVar("T")
+V = TypeVar("V")
 
 MonomorphingCache = MutableMapping["TypeVar", "Type"]
+MonomorphizeReturn = \
+    Tuple["Type", MutableMapping[Union["TypeVar", "Type"], "Type"]]
 _fresh_typename_counter = count(0)
+
+
+def merge_disjoint_maps(srcs: Iterable[Mapping[T, V]]) -> MutableMapping[T, V]:
+    to_r = {}
+    for src in srcs:
+        for k, v in src.items():
+            if k in to_r:
+                raise ValueError(f"Key {k} duplicated")
+            to_r[k] = v
+    return to_r
 
 
 class TypeVar:
     def __init__(self):
         super().__init__()
         self.name = "TV" + str(next(_fresh_typename_counter))
+
+    @property
+    def type_parameters(self) -> Sequence[Union["TypeVar", "Type"]]:
+        return []
 
     def replace_type(self, old: Union["Type", "TypeVar"],
                      new: Union["Type", "TypeVar"]) \
@@ -19,10 +38,10 @@ class TypeVar:
             return new
         return self
 
-    def make_monomorphic(self, cache: MonomorphingCache) -> "Type":
+    def make_monomorphic(self, cache: MonomorphingCache) -> MonomorphizeReturn:
         if self not in cache:
             cache[self] = SymbolicAbstractType()
-        return cache[self]
+        return cache[self], {self: cache[self]}
 
     def __hash__(self):
         return hash((self.name, id(self)))
@@ -39,7 +58,7 @@ class Type:
     def type_parameters(self) -> Sequence[Union[TypeVar, "Type"]]:
         raise NotImplementedError()
 
-    def make_monomorphic(self, cache: MonomorphingCache) -> "Type":
+    def make_monomorphic(self, cache: MonomorphingCache) -> MonomorphizeReturn:
         """Copy the type, replacing type variables with monotypes.
         """
         raise NotImplementedError()
@@ -53,8 +72,8 @@ class Type:
 
 
 class UnitType(Type):
-    def make_monomorphic(self, cache: MonomorphingCache) -> "Type":
-        return self
+    def make_monomorphic(self, cache: MonomorphingCache) -> MonomorphizeReturn:
+        return self, {}
 
     @property
     def type_parameters(self) -> Sequence[Union[TypeVar, "Type"]]:
@@ -87,8 +106,8 @@ class SymbolicAbstractType(Type):
         super().__init__()
         self.typename = "t" + str(next(_fresh_typename_counter))
 
-    def make_monomorphic(self, cache: MonomorphingCache) -> "Type":
-        return self
+    def make_monomorphic(self, cache: MonomorphingCache) -> MonomorphizeReturn:
+        return self, {}
 
     @property
     def type_parameters(self) -> Sequence[Union[TypeVar, Type]]:
@@ -117,15 +136,18 @@ class SymbolicAbstractType(Type):
 @dataclass(eq=True, frozen=True)
 class TupleType(Type):
     """Param. poly. type for Python tuples."""
-    element_types: typing.Tuple[Union[Type, TypeVar], ...]
+    element_types: Tuple[Union[Type, TypeVar], ...]
 
     @property
     def type_parameters(self) -> Sequence[Union[TypeVar, "Type"]]:
         return self.element_types
 
-    def make_monomorphic(self, cache: MonomorphingCache) -> "Type":
-        return TupleType(tuple(e.make_monomorphic(cache)
-                               for e in self.element_types))
+    def make_monomorphic(self, cache: MonomorphingCache) -> MonomorphizeReturn:
+        buf: List[MonomorphizeReturn] = \
+            [e.make_monomorphic(cache) for e in self.element_types]
+        m = TupleType(tuple(a for a, _ in buf))
+        n = merge_disjoint_maps(b for _, b in buf)
+        return m, n
 
     def replace_type(self, old: Union[Type, TypeVar],
                      new: Union[Type, TypeVar]) -> Union[Type, TypeVar]:
@@ -142,12 +164,14 @@ class TupleType(Type):
 @dataclass(frozen=True)
 class ExtraCol:
     arg: Union[int, str]
-    col_names: typing.Tuple[str]
+    col_names: Tuple[str, ...]
     col_type: Union[Type, TypeVar]
 
-    def make_monomorphic(self, cache: MonomorphingCache) -> "ExtraCol":
-        return ExtraCol(self.arg, self.col_names,
-                        self.col_type.make_monomorphic(cache))
+    def make_monomorphic(self, cache: MonomorphingCache) \
+            -> Tuple["ExtraCol", Mapping[Union[Type, TypeVar], Type]]:
+        m, subs = self.col_type.make_monomorphic(cache)
+        n = ExtraCol(self.arg, self.col_names, m)
+        return n, subs
 
     def __str__(self):
         return f"{self.arg}[{self.col_names}]:{self.col_type}"
@@ -157,7 +181,7 @@ class ExtraCol:
 class CallableType(Type):
     "Type for functions and other callables. The only parametric type we have."
 
-    param_types: typing.Tuple[Union[Type, TypeVar], ...]
+    param_types: Tuple[Union[Type, TypeVar], ...]
     return_type: Union[Type, TypeVar]
     "Either the return type of the function or `None` if void/unit."
 
@@ -168,12 +192,20 @@ class CallableType(Type):
     def type_parameters(self) -> Sequence[Union[TypeVar, Type]]:
         return list(chain(self.param_types, [self.return_type]))
 
-    def make_monomorphic(self, cache: MonomorphingCache) -> "CallableType":
-        return CallableType(
-            param_types=tuple(a.make_monomorphic(cache) for a in self.param_types),
-            return_type=self.return_type.make_monomorphic(cache),
-            extra_cols=frozenset(a.make_monomorphic(cache)
-                                 for a in self.extra_cols))
+    def make_monomorphic(self, cache: MonomorphingCache) \
+            -> Tuple["CallableType", Mapping[Union[TypeVar, Type], Type]]:
+        params_mono: List[MonomorphizeReturn] = \
+            [a.make_monomorphic(cache) for a in self.param_types]
+        return_mono, return_subs = self.return_type.make_monomorphic(cache)
+        extras_mono = [a.make_monomorphic(cache) for a in self.extra_cols]
+        n = CallableType(
+            param_types=tuple(m for m, _ in params_mono),
+            return_type=return_mono,
+            extra_cols=frozenset(m for m, _ in extras_mono))
+        subs = merge_disjoint_maps([return_subs] +
+                                   [s for _, s in params_mono] +
+                                   [s for _, s in extras_mono])
+        return n, subs
 
     def replace_type(self, old: Union[Type, TypeVar],
                      new: Union[Type, TypeVar]) -> Union[Type, TypeVar]:
