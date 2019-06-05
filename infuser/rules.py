@@ -9,7 +9,8 @@ from .abstracttypes import Type, SymbolicAbstractType, PandasModuleType, \
     DataFrameClsType, CallableType, TypeVar, ExtraCol, TupleType, \
     TupleType as tTuple, UnitType, StatsmodelsModuleType, ScipyModuleType, \
     ScipyStatsModuleType, MannWhitneyUFunc
-from .typeenv import TypingEnvironment, SymbolTypeReferant, ColumnTypeReferant
+from .typeenv import TypingEnvironment, SymbolTypeReferant, ColumnTypeReferant, \
+    TypeReferant
 
 logger = logging.getLogger(__name__)
 
@@ -62,6 +63,8 @@ class WalkRulesVisitor(ast.NodeVisitor):
     _return_types: List[List[Type]]
     "Stack of collections of types of return expressions from `FunctionDef`s."
 
+    referants_made: Mapping[Optional[str], Set[TypeReferant]]
+
     _current_stage: Optional[str]
     "String describing current stage being visited; `None` if no stage entered."
 
@@ -72,6 +75,7 @@ class WalkRulesVisitor(ast.NodeVisitor):
         self._type_environment_stack = [TypingEnvironment()]
         self._symtable_stack: List[symtable.SymbolTable] = [sym_table]
         self._return_types = []
+        self.referants_made = defaultdict(set)
         self._current_stage = None
 
     @property
@@ -97,8 +101,9 @@ class WalkRulesVisitor(ast.NodeVisitor):
             else:
                 sym_name = a.name if a.asname is None else a.asname
                 mod_sym = self._symtable_stack[-1].lookup(sym_name)
-                self._type_environment_stack[-1][SymbolTypeReferant(mod_sym)] \
-                    = mod_type()
+                mod_sym_ref = SymbolTypeReferant(mod_sym)
+                self._type_environment_stack[-1][mod_sym_ref] = mod_type()
+                self._log_referant(mod_sym_ref)
 
     def visit_ImportFrom(self, node: ast.ImportFrom) -> None:
         self.generic_visit(node)
@@ -109,8 +114,9 @@ class WalkRulesVisitor(ast.NodeVisitor):
                     constructor = MODULE_TO_METHOD[key]
                     sym_name = a.name if a.asname is None else a.asname
                     sym = self._symtable_stack[-1].lookup(sym_name)
-                    self._type_environment_stack[-1][SymbolTypeReferant(sym)] \
-                        = constructor()
+                    sym_ref = SymbolTypeReferant(sym)
+                    self._type_environment_stack[-1][sym_ref] = constructor()
+                    self._log_referant(sym_ref)
 
     def visit_Call(self, node: ast.Call) -> None:
         # Remember that this may be called inside `visit_Assign` etc.
@@ -156,6 +162,7 @@ class WalkRulesVisitor(ast.NodeVisitor):
                     assert isinstance(extra_col.col_type, Type)
                     self._push_constraint(
                         TypeEqConstraint(prev_type, extra_col.col_type, node))
+                    self._log_referant(ref)
                 else:
                     raise NotImplementedError(
                         "Only position args supported so far")
@@ -176,7 +183,9 @@ class WalkRulesVisitor(ast.NodeVisitor):
             # TODO: Ensure this doesn't grab second-order nested func. params.
             if sym.is_parameter():
                 arg_type_var = TypeVar()
-                type_env[SymbolTypeReferant(sym)] = arg_type_var
+                sym_ref = SymbolTypeReferant(sym)
+                type_env[sym_ref] = arg_type_var
+                self._log_referant(sym_ref)
                 arg_types.append((arg_type_var, sym))
 
         # Avoid decorators. Manually call visit on statements.
@@ -192,7 +201,9 @@ class WalkRulesVisitor(ast.NodeVisitor):
         # Add side effects to `extra_cols`
         extra_cols = set()
         for i, (a, sym) in enumerate(arg_types):
-            c = type_env.subscripted_name_closure(SymbolTypeReferant(sym))
+            sym_ref = SymbolTypeReferant(sym)
+            self._log_referant(sym_ref)
+            c = type_env.subscripted_name_closure(sym_ref)
             for sub, t in c.items():
                 extra_cols.add(ExtraCol(i, sub.column_names, t))
 
@@ -203,8 +214,10 @@ class WalkRulesVisitor(ast.NodeVisitor):
 
         self._return_types.pop()
         self._pop_scope()
-        self._type_environment_stack[-1][SymbolTypeReferant(
-            self._symtable_stack[-1].lookup(node.name))] = func_type
+        func_sym_ref = SymbolTypeReferant(
+            self._symtable_stack[-1].lookup(node.name))
+        self._type_environment_stack[-1][func_sym_ref] = func_type
+        self._log_referant(func_sym_ref)
         logger.debug(f"Assigned function {node.name}: {func_type}")
 
     def visit_AugAssign(self, node: ast.AugAssign) -> None:
@@ -253,6 +266,7 @@ class WalkRulesVisitor(ast.NodeVisitor):
                         t_sym_ref = SymbolTypeReferant(
                             self._symtable_stack[-1].lookup(t.id))
                         type_env[t_sym_ref] = SymbolicAbstractType()
+                        self._log_referant(t_sym_ref)
                     else:
                         raise NotImplementedError(
                             "Only name targets are implemented")
@@ -271,8 +285,9 @@ class WalkRulesVisitor(ast.NodeVisitor):
                             assert isinstance(t, ast.Name)
                             t_sym_ref = SymbolTypeReferant(
                                 self._symtable_stack[-1].lookup(t.id))
-                            type_env[t_sym_ref.add_subscript(k.s)] = \
-                                SymbolicAbstractType()
+                            t_sym_ref = t_sym_ref.add_subscript(k.s)
+                            type_env[t_sym_ref] = SymbolicAbstractType()
+                            self._log_referant(t_sym_ref)
         else:
             value_type = self._get_expr_type(node.value, bake_fresh=True)
 
@@ -287,7 +302,9 @@ class WalkRulesVisitor(ast.NodeVisitor):
                         v_sym_ref = SymbolTypeReferant(
                             self._symtable_stack[-1].lookup(node.value.id))
                         type_env.copy_assignments(t_sym_ref, v_sym_ref)
+                        # TODO: Add _log_referant for all the subscripts
                     type_env[t_sym_ref] = value_type
+                    self._log_referant(t_sym_ref)
                 elif isinstance(t, ast.Subscript):
                     root, subscript_chain = accum_string_subscripts(t)
                     if not isinstance(root, ast.Name):
@@ -297,6 +314,7 @@ class WalkRulesVisitor(ast.NodeVisitor):
                             self._symtable_stack[-1].lookup(root.id)),
                         column_names=tuple(subscript_chain))
                     type_env[ref] = value_type
+                    self._log_referant(ref)
                 elif isinstance(t, ast.Tuple):
                     if not all(isinstance(e, ast.Name) for e in t.elts):
                         raise NotImplementedError("Only flat, named"
@@ -309,9 +327,12 @@ class WalkRulesVisitor(ast.NodeVisitor):
                         e_sym_ref = SymbolTypeReferant(
                             self._symtable_stack[-1].lookup(e.id))
                         type_env[e_sym_ref] = fresh_type
+                        self._log_referant(e_sym_ref)
                         for r, ta in type_env.subscripted_name_closure(
                                 e_sym_ref).items():
-                            type_env[r.replace_symbol(e_sym_ref)] = ta
+                            new_ref = r.replace_symbol(e_sym_ref)
+                            type_env[new_ref] = ta
+                            self._log_referant(new_ref)
                     #   - Constrain a TupleType to right-hand side
                     self._push_constraint(TypeEqConstraint(
                         TupleType(new_symbolics), value_type, src_node=node))
@@ -329,6 +350,7 @@ class WalkRulesVisitor(ast.NodeVisitor):
             name_sym = self._symtable_stack[-1].lookup(root.id)
             name_ref = SymbolTypeReferant(name_sym)
             ref = ColumnTypeReferant(name_ref, subscript_chain)
+            self._log_referant(ref)
             if ref not in self.type_environment:
                 t = self._get_expr_type(node, bake_fresh=True,
                                         allow_non_load_name_lookups=True)
@@ -388,6 +410,7 @@ class WalkRulesVisitor(ast.NodeVisitor):
                               ast.Load) and not allow_non_load_name_lookups:
                 raise ValueError(f"Looked up name {expr} with non-Load ctx")
             sym = SymbolTypeReferant(self._symtable_stack[-1].lookup(expr.id))
+            self._log_referant(sym)
             to_r = self._type_environment_stack[-1].get(sym)
             if to_r is None and bake_fresh:
                 to_r = self._type_environment_stack[-1].get_or_bake(sym)
@@ -540,6 +563,11 @@ class WalkRulesVisitor(ast.NodeVisitor):
 
     def _push_constraint(self, c: TypeEqConstraint) -> None:
         self.type_constraints[self._current_stage].add(c)
+
+    def _log_referant(self, ref: TypeReferant) -> None:
+        # Only record when we're at the module level
+        if len(self._type_environment_stack) == 1:
+            self.referants_made[self._current_stage].add(ref)
 
 
 def accum_string_subscripts(expr: ast.Subscript) \

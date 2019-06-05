@@ -53,13 +53,14 @@ def analysis_main(code_str: str, filename: str, printer: CLIPrinter) -> int:
     for (e1, m1, s1), (e2, m2, s2) in \
             combinations(zip(new_envs, src_maps, STAGES), 2):
         merged_maps = merge_set_valued_mapping([m1, m2])
-        all_shared_names = set(e1.keys()) & set(e2.keys())
+        assert set(e1.keys()) == set(e2.keys())
+        all_shared_names = set(e1.keys()) & visitor.referants_made[s1] & visitor.referants_made[s2]
+
         for n1, n2 in combinations_with_replacement(all_shared_names, 2):
             same_under_one = (e1[n1] == e1[n2])
             same_under_two = (e2[n1] == e2[n2])
 
             if same_under_one != same_under_two:
-                # import pdb; pdb.set_trace()
                 # TODO: Factor out the warnings I/O for easier I/O testing
                 src_nodes = (merged_maps[e1[n1]] | merged_maps[e1[n2]] |
                              merged_maps[e2[n1]] | merged_maps[e2[n2]])
