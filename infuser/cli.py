@@ -1,3 +1,4 @@
+from itertools import groupby
 import json
 import sys
 from typing import Tuple, Sequence
@@ -35,11 +36,17 @@ class CLIPrinter:
                 print()
             print(f"{text}. Interactions found at:")
             print()
-            for line_no, char_offset in locations:
+
+            for line_no, items in groupby(sorted(locations), key=lambda t: t[0]):
+                char_offsets = [o for _, o in items]
                 line = self.src_code.splitlines()[line_no]
                 print("  " + line.lstrip())
                 chars_removed = len(line) - len(line.lstrip())
-                print((" " * (2 + char_offset - chars_removed)) + "^")
+                ptr_line = " " * (2 + char_offsets[0] - chars_removed)
+                ptr_line += "^"
+                for x, y in zip(char_offsets, char_offsets[1:]):
+                    ptr_line += " " * ((y - x) - 1) + "^"
+                print(ptr_line)
         self.warnings_printed += 1
 
     def summarize(self):
