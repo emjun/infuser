@@ -34,7 +34,7 @@ class CLIPrinter:
         else:
             if self.warnings_printed > 0:
                 print()
-            print(f"{text}. Interactions found at:")
+            print(f"{text}. Type was modified at:")
             print()
 
             for line_no, items in groupby(sorted(locations), key=lambda t: t[0]):

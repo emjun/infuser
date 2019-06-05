@@ -265,7 +265,10 @@ class WalkRulesVisitor(ast.NodeVisitor):
                     if isinstance(t, ast.Name):
                         t_sym_ref = SymbolTypeReferant(
                             self._symtable_stack[-1].lookup(t.id))
-                        type_env[t_sym_ref] = SymbolicAbstractType()
+                        self._push_constraint(TypeEqConstraint(
+                            type_env.get_or_bake(t_sym_ref),
+                            SymbolicAbstractType(),
+                            src_node=node))
                         self._log_referant(t_sym_ref)
                     else:
                         raise NotImplementedError(
@@ -286,7 +289,10 @@ class WalkRulesVisitor(ast.NodeVisitor):
                             t_sym_ref = SymbolTypeReferant(
                                 self._symtable_stack[-1].lookup(t.id))
                             t_sym_ref = t_sym_ref.add_subscript(k.s)
-                            type_env[t_sym_ref] = SymbolicAbstractType()
+                            self._push_constraint(TypeEqConstraint(
+                                type_env.get_or_bake(t_sym_ref),
+                                SymbolicAbstractType(),
+                                src_node=node))
                             self._log_referant(t_sym_ref)
         else:
             value_type = self._get_expr_type(node.value, bake_fresh=True)
@@ -301,9 +307,13 @@ class WalkRulesVisitor(ast.NodeVisitor):
                         # TODO: What about nested subscripts?
                         v_sym_ref = SymbolTypeReferant(
                             self._symtable_stack[-1].lookup(node.value.id))
+                        # TODO: Change `copy_assignments` to `eq_assignments`
                         type_env.copy_assignments(t_sym_ref, v_sym_ref)
                         # TODO: Add _log_referant for all the subscripts
-                    type_env[t_sym_ref] = value_type
+                    self._push_constraint(TypeEqConstraint(
+                        type_env.get_or_bake(t_sym_ref),
+                        value_type,
+                        src_node=node))
                     self._log_referant(t_sym_ref)
                 elif isinstance(t, ast.Subscript):
                     root, subscript_chain = accum_string_subscripts(t)
@@ -313,7 +323,9 @@ class WalkRulesVisitor(ast.NodeVisitor):
                         symbol=SymbolTypeReferant(
                             self._symtable_stack[-1].lookup(root.id)),
                         column_names=tuple(subscript_chain))
-                    type_env[ref] = value_type
+                    self._push_constraint(
+                        TypeEqConstraint(type_env.get_or_bake(ref), value_type,
+                                         src_node=node))
                     self._log_referant(ref)
                 elif isinstance(t, ast.Tuple):
                     if not all(isinstance(e, ast.Name) for e in t.elts):
