@@ -40,9 +40,10 @@ class CLIPrinter:
             for line_no, items in groupby(sorted(locations), key=lambda t: t[0]):
                 char_offsets = [o for _, o in items]
                 line = self.src_code.splitlines()[line_no]
-                print("  " + line.lstrip())
+                line_prefix = f"  line {line_no}: "
+                print(line_prefix + line.lstrip())
                 chars_removed = len(line) - len(line.lstrip())
-                ptr_line = " " * (2 + char_offsets[0] - chars_removed)
+                ptr_line = " " * (len(line_prefix) + char_offsets[0] - chars_removed)
                 ptr_line += "^"
                 for x, y in zip(char_offsets, char_offsets[1:]):
                     ptr_line += " " * ((y - x) - 1) + "^"
