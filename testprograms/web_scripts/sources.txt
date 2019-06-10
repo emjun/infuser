@@ -1,0 +1,18 @@
+ttest_nodata.py
+https://machinelearningmastery.com/nonparametric-statistical-significance-tests-in-python/
+
+ranksums_twice.py
+http://www.randalolson.com/2012/08/06/statistical-analysis-made-easy-in-python/
+https://github.com/briandconnelly/BEACONToolkit/tree/master/analysis/scripts
+
+multiple_tests.py
+https://gist.github.com/mblondel/1761714
+
+Welch's.py, wilcoxon_twice_short.py
+https://pythonfordatascience.org/inferential-statistics/
+
+wilcoxon_no_data.py
+https://machinelearningmastery.com/statistical-hypothesis-tests-in-python-cheat-sheet/
+
+Forecasting.py
+https://github.com/LearnDataSci/article-resources/tree/master/Essential%20Statistics
