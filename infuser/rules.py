@@ -356,8 +356,8 @@ class WalkRulesVisitor(ast.NodeVisitor):
                         TupleType(new_symbolics), value_type, src_node=node))
                 else:
                     raise NotImplementedError(
-                        f"Only name and subscripted targets are implemented; "
-                        f"not {type(t)}")
+                        f"Only assignment to name and subscripted targets is "
+                        f"implemented; not {type(t)}")
 
     def visit_Subscript(self, node: ast.Subscript) -> None:
         # Any time we see a subscript with a name as its base, stick it in the
