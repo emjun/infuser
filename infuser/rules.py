@@ -230,7 +230,7 @@ class WalkRulesVisitor(ast.NodeVisitor):
         self.generic_visit(node)
         if isinstance(node.op, (ast.Add, ast.Sub)):
             if isinstance(node.target, (ast.Name, ast.Subscript)):
-                tgt_type = self._get_expr_type(node.target)
+                tgt_type = self._get_expr_type(node.target, allow_non_load_name_lookups=True)
                 val_type = self._get_expr_type(node.value)
                 if val_type is not None:
                     constraint = TypeEqConstraint(tgt_type, val_type, node)
