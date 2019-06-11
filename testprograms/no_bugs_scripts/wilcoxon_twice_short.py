@@ -13,6 +13,5 @@ df['bp_difference'][df['bp_difference']==0]
 "ANALYSIS"
 stats.wilcoxon(df['bp_difference'])
 
-
 stats.wilcoxon(df['bp_before'], df['bp_after'])
 
