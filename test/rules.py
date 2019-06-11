@@ -308,6 +308,13 @@ dupe_col(mapping1); dupe_col(mapping2)"""]
         visitor.visit(root_node)
         self.assertIsInstance(visitor.type_environment.get(SymbolTypeReferant(table.lookup("stats"))), ScipyStatsModuleType)
 
+    def test_list_comprehensions_dont_raise(self):
+        code_str = "x = [1 for _ in range(10)]"
+        root_node = ast.parse(code_str, '<unknown>', 'exec')
+        table = symtable.symtable(code_str, '<unknown>', 'exec')
+        visitor = WalkRulesVisitor(table)
+        visitor.visit(root_node)
+
     @staticmethod
     def types_connected(a, b, visitor: WalkRulesVisitor, stage=None) -> bool:
         if not isinstance(a, (Type, TypeVar)):

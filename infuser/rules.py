@@ -491,6 +491,10 @@ class WalkRulesVisitor(ast.NodeVisitor):
             logger.debug("Yielding a fresh symbolic type for list")
             return SymbolicAbstractType()
 
+        if isinstance(expr, ast.ListComp):
+            logger.debug("Yielding a fresh symbolic type for list comprehension")
+            return SymbolicAbstractType()
+
         if isinstance(expr, ast.Dict):
             logger.debug("Yielding a fresh symbolic type for dictionary")
             return SymbolicAbstractType()
