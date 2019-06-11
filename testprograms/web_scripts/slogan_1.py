@@ -26,19 +26,39 @@ df_contributors = pd.read_csv('../data/study_data/contributor_5_8_18_pre_move.cs
 df_contributions = pd.read_csv('../data/study_data/contribution_5_8_18_pre_move.csv', engine='python', sep=';')
 df_slogans = pd.read_csv('../data/study_data/studythingy.csv', engine='python', sep=';')
 
+
+
 ### Format Data ### 
 
 # Rename columns and drop excess index column for contributors and contributor_id and design_id for slogans
-df_contributions.columns = ['id', 'date_created', 'status', 'comparison', 'owner_id']
-df_contributors.columns = ['id', 'demographics', 'index2', 'motivations']
-df_slogans.columns = ['id', 'slogan', 'contributor_id', 'design_id']
+
+df_contributions = df_contributions.rename(columns={'created':'date_created', 'data':'comparison'})
+#df_contributions.columns = ['id', 'date_created', 'status', 'comparison', 'owner_id']
+
+
+df_contributors = df_contributors.rename(columns={'user_id':'index2'})
+#df_contributors.columns = ['id', 'demographics', 'index2', 'motivations']
+
+df_slogans = df_slogans.rename(columns={'data':'slogan'})
+#df_slogans.columns = ['id', 'slogan', 'contributor_id', 'design_id']
+
+
 
 df_contributors = df_contributors.drop(['index2'], axis=1)
 df_slogans = df_slogans.drop(['contributor_id'], axis=1)
 
-# Add column to slogans for study name
-df_slogans['study'] = df_slogans.design_id.apply(lambda x: "Implicit Memory" if x > 12 else ("Thinking Style" if x > 6 else "Color"))
 
+
+# Add column to slogans for study name
+#df_slogans['study'] = df_slogans.design_id.apply(lambda x: "Implicit Memory" if x > 12 else ("Thinking Style" if x > 6 else "Color"))
+
+df_slogans['design_id'] = df_slogans['design_id'].apply(lambda x: 2*x)
+df_slogans['design_id'] = df_slogans['design_id'].apply(lambda x: 2*x if x < 3 else 3*x)
+
+
+#df_slogans['study'] = df_slogans['design_id'].apply(lambda x: "Implicit Memory" if x > 0 else "Thinking Stlye")
+
+'''
 # Convert demographics and data columns for contributors and contributions, respectively, to dictionaries
 df_contributors.demographics = df_contributors.demographics.apply(lambda x: json.loads(str.strip(x, '\'')))
 df_contributors.motivations = df_contributors.motivations.apply(lambda x: json.loads(str.strip(x, '\'')))
@@ -127,6 +147,7 @@ set_up_framings(df_slogans, 'slogan')
 
 
 
+'''
 
 
 
@@ -134,6 +155,7 @@ set_up_framings(df_slogans, 'slogan')
 "ANALYSIS"
 
 
+'''
 # Calculating effect size 
 # taken from https://stackoverflow.com/questions/15436702/estimate-cohens-d-for-effect-size?rq=1
 def cohens_d(x, y):
@@ -332,7 +354,7 @@ motivations = [df_dem_mot[mot] for mot in list(df_motivations.columns.drop('id')
 
 
 
-
+'''
 
 
 

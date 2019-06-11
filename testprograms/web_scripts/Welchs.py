@@ -13,6 +13,16 @@ virginica = df[(df['species'] == 'Iris-virginica')]
 
 
 
+'''
+# just a test if apply works
+def mult(x, k):
+    return k*x
+
+
+ndf = virginica['sepal_length'].apply(lambda x: mult(x,2))
+print(ndf)
+'''
+
 "ANALYSIS"
 
 sh1 = stats.shapiro(setosa['petal_length'])

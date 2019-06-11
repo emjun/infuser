@@ -34,6 +34,7 @@ def decode_json_entry(json_db_entry):
 def get_key(entry, val):
     return 'data_type' in entry and val == entry["data_type"];
 
+# the problem is the lambda function I guess
 def return_key_df(df, key):
     return df[df.data.apply(lambda x: get_key(x, key))]['data'].apply(pd.Series).drop('data_type', axis=1)
 
@@ -43,6 +44,7 @@ def return_key_df(df, key):
 ############################
 
 df = pd.read_csv('../data/litw_iq_data.csv', sep=";", engine='python')
+'''
 df.data = df.data.apply(decode_json_entry)
 
 df_data = df[df.data.apply(lambda x: get_key(x, 'study:data'))]['data'].apply(pd.Series).drop('data_type', axis=1)
@@ -502,7 +504,7 @@ model.summary2()
 
 
 
-
+'''
 
 
 
