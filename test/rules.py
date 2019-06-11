@@ -315,6 +315,14 @@ dupe_col(mapping1); dupe_col(mapping2)"""]
         visitor = WalkRulesVisitor(table)
         visitor.visit(root_node)
 
+    def test_true_false_and_null_dont_raise(self):
+        for c in ["True", "False", "None"]:
+            code_str = "x = " + c
+            root_node = ast.parse(code_str, '<unknown>', 'exec')
+            table = symtable.symtable(code_str, '<unknown>', 'exec')
+            visitor = WalkRulesVisitor(table)
+            visitor.visit(root_node)
+
     @staticmethod
     def types_connected(a, b, visitor: WalkRulesVisitor, stage=None) -> bool:
         if not isinstance(a, (Type, TypeVar)):

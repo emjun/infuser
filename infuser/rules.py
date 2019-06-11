@@ -505,6 +505,9 @@ class WalkRulesVisitor(ast.NodeVisitor):
         if isinstance(expr, ast.Attribute):
             raise NotImplementedError("Attributes not implemented")
 
+        if isinstance(expr, ast.NameConstant):
+            return SymbolicAbstractType()
+
         raise NotImplementedError(
             f"Unable to judge type for expression: {expr}")
 
