@@ -11,8 +11,10 @@ import pandas as pd
 
 "WRANGLING"
 base_path = '/Users/emjun/Git/infuser/testprograms/data'
-file_name = 'data_0.csv'
+file_name = 'timing.csv'
 file_path = os.path.join(base_path, file_name)
+
+#file_path = '../data/timing.csv'
 data = pd.read_csv(file_path)
 print(data)
 
@@ -48,21 +50,7 @@ for s in subjects:
     print('cache_mean: ' + str(cache_mean))
     print('naive_mean: ' + str(naive_mean))
 
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+     
         
         
         

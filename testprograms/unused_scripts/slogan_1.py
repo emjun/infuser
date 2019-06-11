@@ -11,6 +11,9 @@ from scipy import stats
 from statsmodels.stats.multicomp import pairwise_tukeyhsd
 from statsmodels.sandbox.stats.multicomp import multipletests
 
+"""
+SAM: CHECK OUT LNES 58-60
+"""
 
 "WRANGLING"
 
@@ -54,9 +57,7 @@ df_slogans = df_slogans.drop(['contributor_id'], axis=1)
 
 df_slogans['design_id'] = df_slogans['design_id'].apply(lambda x: 2*x)
 df_slogans['design_id'] = df_slogans['design_id'].apply(lambda x: 2*x if x < 3 else 3*x)
-
-
-#df_slogans['study'] = df_slogans['design_id'].apply(lambda x: "Implicit Memory" if x > 0 else "Thinking Stlye")
+df_slogans['study'] = df_slogans['design_id'].apply(lambda x: "Implicit Memory" if x > 0 else "Thinking Stlye")
 
 '''
 # Convert demographics and data columns for contributors and contributions, respectively, to dictionaries

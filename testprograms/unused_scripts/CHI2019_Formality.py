@@ -10,6 +10,9 @@ import seaborn as sns
 from scipy import stats
 import datetime as dt
 
+"""
+SAM: CHECK OUT LINE 42
+"""
 
 from functools import reduce
 from statsmodels.formula.api import ols

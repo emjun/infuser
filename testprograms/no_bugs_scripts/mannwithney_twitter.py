@@ -9,7 +9,7 @@ import math
 
 "WRANGLING"
 
-df = pd.read_csv("task2_data.csv")
+df = pd.read_csv("../data/task2_data.csv")
 
 #4 complete datasets
 nr_entities = df['#entities']

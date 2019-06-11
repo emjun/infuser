@@ -5,11 +5,11 @@ from statsmodels.stats.multicomp import pairwise_tukeyhsd
 
 """
 https://github.com/apaunescu/DS/blob/fbecc6c9e73aaf4519bb52c3886f411bc9de2b35/e6/analyse_data.py
-INFUSER GIVES ERROR ON LINE 44, NOT SURE WHY THOUGH
+HAD TO COMMENT OUT SOME LINES, INFUSER GIVES ERROR ON LINE 44, NOT SURE WHY THOUGH
 """
 
 "WRANGLING"
-data = pd.read_csv('data.csv')
+data = pd.read_csv('../data/data.csv')
 
 #['qs1', 'qs2', 'qs3', 'qs4', 'qs5', 'merge1', 'partition_sort']
 

@@ -9,7 +9,7 @@ WORKS PERFERCTLY FINE
 """
 "WRANGLING"
 
-df = pd.read_csv("dog_rates_tweets.csv", parse_dates = ['created_at'])
+df = pd.read_csv("../data/dog_rates_tweets.csv", parse_dates = ['created_at'])
 
 def find_rating(text):
     match = re.search(r'(\d+(\.\d+)?)/10', text)

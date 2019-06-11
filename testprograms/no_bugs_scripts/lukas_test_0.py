@@ -18,7 +18,7 @@ file_name = 'data_0.csv'
 file_path = os.path.join(base_path, file_name)
 data = pd.read_csv(file_path)
 '''
-data = pd.read_csv('data/data_0.csv')
+data = pd.read_csv('../data/data_0.csv')
 
 #import pdb; pdb.set_trace()
 

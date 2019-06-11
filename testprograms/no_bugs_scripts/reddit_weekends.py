@@ -32,7 +32,7 @@ def filterCanada(subreddit):
     return subreddit
 
 
-reddit_counts = 'reddit-counts.json'
+reddit_counts = '../data/reddit-counts.json'
 
 counts = pd.read_json(reddit_counts, lines=True)
 counts['date'] = pd.to_datetime(counts['date'])

@@ -16,7 +16,7 @@ DOESNT WORK FOR SECOND PART OF ANALYSIS, INFUSER REJECTS CODE
 
 "WRANGLING"
 
-searchdata_file = 'searches.json'
+searchdata_file = '../data/searches.json'
 
 searches = pd.read_json(searchdata_file, lines=True)
 odd_id = searches[(searches['uid'] %2 != 0)]

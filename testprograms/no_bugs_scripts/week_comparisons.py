@@ -14,8 +14,8 @@ GIVE ONE FOR EVERY TEST CONDUCTED
 
 "WRANGLING"
 
-filename_week_1 = 'neg_correlation_week_1.csv'
-filename_week_2 = 'neg_correlation_week_2.csv'
+filename_week_1 = '../data/neg_correlation_week_1.csv'
+filename_week_2 = '../data/neg_correlation_week_2.csv'
           
 week_1 = pd.read_csv(filename_week_1)
 week_2 = pd.read_csv(filename_week_2)
