@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 '''
-buggy lines: 42
+buggy lines: 43
 '''
 """
 Created on Tue May  7 15:52:47 2019
@@ -38,7 +38,8 @@ cond_a_time = cond_a_time / 60
 
 # let the t-test decide
 
-# this should not be accepted because we compare different units
+# this should not be accepted because we compare different units (we converted
+# cond_a_time to minutes, while cond_b_time still is in seconds)
 stat, p_val = stats.ttest_ind(cond_a_time, cond_b['time'])
 
 print('p_val time: ' + str(p_val))

@@ -1,5 +1,5 @@
 """
-buggy line: 64
+buggy line: 65
 """
 from scipy.stats import mannwhitneyu, median_test, rv_discrete
 import csv
@@ -7,6 +7,7 @@ import numpy as np
 import collections 
 from functools import reduce
 import random
+import pandas as pd
 
 """
 https://github.com/pierreTklein/cogs_444_data_analysis/blob/6aeb2e37afdc1012977bb69aceb0f66e6886fc61/analyze.py

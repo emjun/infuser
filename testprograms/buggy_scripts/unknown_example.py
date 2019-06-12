@@ -1,5 +1,5 @@
 """
-buggy lines: 21, 24
+buggy lines: 24, 27
 """
 from scipy.stats import ttest_ind, mannwhitneyu
 import pandas as pd
@@ -16,7 +16,10 @@ x = data.loc[:,0].astype(float).values
 y = data.loc[~pd.isnull(data.loc[:,1]),1].astype(float).values
 
 "ANALYSIS"
-# debatable wheter is buggy or not - we just don't have the information
+
+""" ################### README ###################################
+debatable wheter is buggy or not - we just don't have the information
+"""
 print("Column # 1 significantly differs from #2 (t-test)")
 t_test = ttest_ind(x,y) 
 

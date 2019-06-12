@@ -39,8 +39,8 @@ anova = stats.f_oneway(qs1['total_time'], qs2['total_time'], qs3['total_time'], 
 
 anova1 = stats.f_oneway(qs1['total_time'], qs2['total_time'])
 
-# bug: we compare two unrelated quantities, should give an error
-anova2 = stats.f_oneway(qs1['starting_time'], qs1['end_time'])
+# bug: we compare a moment in time with a time duration ==> should give error
+anova2 = stats.f_oneway(qs1['starting_time'], qs1['total_time'])
 
 
 print(qs1['total_time'].mean(), qs2['total_time'].mean(), qs3['total_time'].mean() ,qs4['total_time'].mean(), qs5['total_time'].mean(), merge1['total_time'].mean(), partition_sort['total_time'].mean())
