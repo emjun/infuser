@@ -1,0 +1,14 @@
+Infuser issues
+	lambda functions
+	list comprehension: python calls inside list comprehensions, e.g. str(x), list(a)
+
+	field assignments: df.some_col = som_var, doesn't work
+	DataFrame creation routines (compare algorithm_comparison.py)
+	pandas concat function is not supported yet. That actually arises quite often
+
+
+fixed:
+	operator +=
+	Constant values: True, False, None
+	list comprehension basics
+

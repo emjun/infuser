@@ -37,21 +37,30 @@ def decode_json_entry(json_db_entry):
 def get_key(entry, val):
     return 'data_type' in entry and val == entry["data_type"];
 
+def return_key_df(df, key):
+
+    def l1(x):
+        return get_key(x, key)
+    return df[df.data.apply(l1)]['data'].apply(pd.Series).drop('data_type', axis=1)
+
+"""
 # the problem is the lambda function I guess
 def return_key_df(df, key):
     return df[df.data.apply(lambda x: get_key(x, key))]['data'].apply(pd.Series).drop('data_type', axis=1)
-
+"""
 
 ############################
 ####### Get the data  ######
 ############################
 
 df = pd.read_csv('../data/litw_iq_data.csv', sep=";", engine='python')
-'''
+
+# this line again is problematic
 df.data = df.data.apply(decode_json_entry)
 
-df_data = df[df.data.apply(lambda x: get_key(x, 'study:data'))]['data'].apply(pd.Series).drop('data_type', axis=1)
+#df_data = df[df.data.apply(lambda x: get_key(x, 'study:data'))]['data'].apply(pd.Series).drop('data_type', axis=1)
 
+'''
 # Collect everything into one df, get some other useful vars
 attention_checks_df = df[df.data.apply(lambda x: get_key(x, 'attentionCheck'))]['data'].apply(pd.Series).drop('data_type', axis=1)
 formality_survey_df = df[df.data.apply(lambda x: get_key(x, 'formalitySurvey'))]['data'].apply(pd.Series).drop('data_type', axis=1)
