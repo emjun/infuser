@@ -66,4 +66,5 @@ def analysis_main(code_str: str, filename: str, printer: CLIPrinter) -> int:
                              merged_maps[e2[n1]] | merged_maps[e2[n2]])
                 printer.warn(n1, n2,
                     set((x.lineno - 1, x.col_offset) for x in src_nodes))
+    printer.summarize() # Added for evaluation
     return 0

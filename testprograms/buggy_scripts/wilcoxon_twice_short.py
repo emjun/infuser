@@ -15,7 +15,7 @@ def age_to_categories(df):
 
 "WRANGLING"
 
-df = pd.read_csv("../data/blood_pressure.csv")
+df = pd.read_csv("./data/blood_pressure.csv")
 
 df[['bp_before','bp_after']].describe()
 
@@ -44,4 +44,5 @@ stats.wilcoxon(men_age.append(women_age))
 
 # while this one compares age categories with blood pressure that have nothing to 
 # do with each other ==> should fail
-stats.wilcoxon(men_age.append(women_age), df['bp_difference'])
+import pdb; pdb.set_trace()
+stats.wilcoxon(men_age.concat(women_age), df['bp_difference'])

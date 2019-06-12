@@ -51,6 +51,6 @@ class CLIPrinter:
         self.warnings_printed += 1
 
     def summarize(self):
-        if self.warnings_printed > 0:
-            print()
+        # if self.warnings_printed > 0:
+            # print()
         print(f"Found {self.warnings_printed} potential problems")
