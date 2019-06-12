@@ -239,8 +239,7 @@ def run_tukey(motivations_dict):
         #i = i + 1
         i += 1
     
-    print('len k: ', len(k_ids))
-    print('len data : ', len(unwrapped_data))
+
     # convert to int 
     unwrapped_data = list(map(int, unwrapped_data))
     results = pairwise_tukeyhsd(unwrapped_data, k_ids, alpha=0.001)
