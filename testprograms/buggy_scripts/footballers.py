@@ -1,5 +1,5 @@
 """
-buggy lines: 74
+buggy lines: 117
 """
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -113,6 +113,7 @@ print('-----------------------------------')
 
 print("NULL HYPOTHESIS: Weight cannot be used to distinguish players "
       "on Starting_Pitcher and Relief_Pitcher positions")
+# we now compare the columns that we wrongfully extracted on line 74
 test_hypothesis(starting_pitchers, relief_pitchers)
 
 

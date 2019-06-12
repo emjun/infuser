@@ -1,5 +1,5 @@
 '''
-buggy lines: 47
+buggy lines: 48
 '''
 
 import pandas as pd
