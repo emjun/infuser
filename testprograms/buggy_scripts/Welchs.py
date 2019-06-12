@@ -52,4 +52,4 @@ def welch_ttest(x, y):
 # again, this one should work
 welch_ttest(setosa['petal_length'], virginica['petal_length'])
 # but this one should fail
-welch_ttest(setosa['petal_length'], virginica['petal_width'])
+welch_ttest(setosa['petal_length'], virginica['sepal_width'])
