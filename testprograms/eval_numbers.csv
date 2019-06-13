@@ -1,0 +1,14 @@
+﻿,Real bugs,False bugs,Not caught bugs,Duplicate bugs,Reported number,Expected number
+algorithm_comparison.py,,,,,1,1
+cars.py,,,,6,6,1
+dog_rates.py,,,,,0,1
+footballers.py,,,,,0,1
+lukas_test_0.py,,,,,0,1
+mannwhitney_twitter.py,,,,,5,1
+novice_expert_time.py,,,,,0,1
+searches_analysis.py,,,,,1,1
+small_test.py,,,,,0,1
+unknown_example.py,,,,,1,2
+week_comparisons.py,,,,,6,1
+Welchs.py,,,,,0,2
+wilcoxon_twice_short.py,,,,,0,1

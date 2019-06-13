@@ -37,7 +37,7 @@ def test_no_bugs():
 
     print('..................NO BUGS SCRIPTS.....................')
 
-    with open(bugs_scripts_list_path, newline='', encoding='utf-8-sig') as listfile: 
+    with open(no_bugs_scripts_list_path, newline='', encoding='utf-8-sig') as listfile: 
         listreader = csv.reader(listfile, delimiter=',')
 
         # for all the scripts named in a file and the line number that should show a bug
@@ -47,7 +47,7 @@ def test_no_bugs():
 
             print(f"File: {script_name}\n")
             print(f"Supposed to have bugs: {num_bugs}\n")
-            script_path = os.path.join(bugs_base_path, script_name)
+            script_path = os.path.join(no_bugs_path, script_name)
             os.system(f"python3 -m infuser {script_path}")
             print("-------------------------------")
 
