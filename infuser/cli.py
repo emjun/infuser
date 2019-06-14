@@ -1,20 +1,11 @@
 from itertools import groupby
 import json
 import sys
-from typing import Tuple, Sequence
+from typing import Tuple, Set
 
 
 class CLIPrinter:
     """Produces Infuser warnings output.
-
-    >>> src = '''import sys
-    >>> sys.good_thing()
-    >>> if 1:
-    >>>     sys.bad_thing()'''
-    >>> printer = CLIPrinter(src)
-    >>> printer.warn(0, 0, "Oh no! An import!")
-    >>> printer.warn(3, 4, "Oh no! A bad thing!")
-    >>> printer.summarize()
     """
 
     def __init__(self, src_code: str, print_json: bool = False):
@@ -23,8 +14,13 @@ class CLIPrinter:
         self.print_json = print_json
         self.warnings_printed = 0
 
-    def warn(self, n1, n2, locations: Sequence[Tuple[int, int]]) -> None:
-        text = f"Disagreement about {n1.display_str()} and {n2.display_str()}"
+    def warn(self, n1, n2, locations: Set[Tuple[int, int]],
+             problem_stage: str) -> None:
+
+        locations = sorted(locations)
+
+        text = f"Types of {n1.display_str()} and {n2.display_str()} were " \
+               f"unified in {problem_stage} only"
         if self.print_json:
             pkg = {"warning": text,
                    "locations": [{"line": l[0], "offset": l[1]}
@@ -34,7 +30,7 @@ class CLIPrinter:
         else:
             if self.warnings_printed > 0:
                 print()
-            print(f"{text}. Type was modified at:")
+            print(f"{text}. See:")
             print()
 
             for line_no, items in groupby(sorted(locations), key=lambda t: t[0]):

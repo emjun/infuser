@@ -61,10 +61,13 @@ def analysis_main(code_str: str, filename: str, printer: CLIPrinter) -> int:
             same_under_two = (e2[n1] == e2[n2])
 
             if same_under_one != same_under_two:
+
                 # TODO: Factor out the warnings I/O for easier I/O testing
                 src_nodes = (merged_maps[e1[n1]] | merged_maps[e1[n2]] |
                              merged_maps[e2[n1]] | merged_maps[e2[n2]])
-                printer.warn(n1, n2,
-                    set((x.lineno - 1, x.col_offset) for x in src_nodes))
+                printer.warn(
+                    n1, n2,
+                    set((x.lineno - 1, x.col_offset) for x in src_nodes),
+                    s1 if same_under_one else s2)
     printer.summarize() # Added for evaluation
     return 0
